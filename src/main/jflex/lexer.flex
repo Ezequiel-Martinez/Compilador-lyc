@@ -38,20 +38,35 @@ Mult = "*"
 Sub = "-"
 Div = "/"
 Assig = "="
+Greater = ">"
+Less = "<"
+GreaterOrEqual = ">="
+LessOrEqual = "<="
+Distinct = "!="
+Equal = "=="
+And = "&"
+Or = "||"
 OpenBracket = "("
 CloseBracket = ")"
+OpenCurlyBrace = "{"
+CloseCurlyBrace = "}"
 Letter = [a-zA-Z]
 Digit = [0-9]
 InicioComentario = "/*"
 FinComentario = "*/"
 AnyCharacter = [^]
+AnyCharacterExceptDoubleQuotes = [^\"]
 StringDelimiter = "\""
 
+Conditional = if|IF
+Else = else|ELSE
+Write = write|WRITE
+Not = not|NOT
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
 IntegerConstant = {Digit}+
 Comment = {InicioComentario} ({AnyCharacter})* {FinComentario}
-StringConstant = {StringDelimiter} ({AnyCharacter})* {StringDelimiter}
+StringConstant = {StringDelimiter} ({AnyCharacterExceptDoubleQuotes})* {StringDelimiter}
 
 %%
 
@@ -59,6 +74,12 @@ StringConstant = {StringDelimiter} ({AnyCharacter})* {StringDelimiter}
 /* keywords */
 
 <YYINITIAL> {
+  /* reserved words */
+  {Conditional}                             { return symbol(ParserSym.CONDITIONAL); }
+  {Else}                                    { return symbol(ParserSym.ELSE); }
+  {Write}                                   { return symbol(ParserSym.WRITE); }
+  {Not}                                     { return symbol(ParserSym.NOT); }
+
   /* identifiers */
   {Identifier}
       {
@@ -67,6 +88,7 @@ StringConstant = {StringDelimiter} ({AnyCharacter})* {StringDelimiter}
           else
             { return symbol(ParserSym.IDENTIFIER, yytext()); }
       }
+
   /* Constants */
   {IntegerConstant}
       {
@@ -77,15 +99,28 @@ StringConstant = {StringDelimiter} ({AnyCharacter})* {StringDelimiter}
             { return symbol(ParserSym.INTEGER_CONSTANT, yytext()); }
       }
 
+
+
   /* operators */
   {Plus}                                    { return symbol(ParserSym.PLUS); }
   {Sub}                                     { return symbol(ParserSym.SUB); }
   {Mult}                                    { return symbol(ParserSym.MULT); }
   {Div}                                     { return symbol(ParserSym.DIV); }
   {Assig}                                   { return symbol(ParserSym.ASSIG); }
+  {Greater}                                 { return symbol(ParserSym.GREATER); }
+  {Less}                                    { return symbol(ParserSym.LESS); }
+  {GreaterOrEqual}                          { return symbol(ParserSym.GREATER_OR_EQUAL); }
+  {LessOrEqual}                             { return symbol(ParserSym.LESS_OR_EQUAL); }
+  {Distinct}                                { return symbol(ParserSym.DISTINCT); }
+  {Equal}                                   { return symbol(ParserSym.EQUAL); }
+  {And}                                     { return symbol(ParserSym.AND); }
+  {Or}                                      { return symbol(ParserSym.OR); }
   {OpenBracket}                             { return symbol(ParserSym.OPEN_BRACKET); }
   {CloseBracket}                            { return symbol(ParserSym.CLOSE_BRACKET); }
+  {OpenCurlyBrace}                          { return symbol(ParserSym.OPEN_CURLY_BRACE); }
+  {CloseCurlyBrace}                         { return symbol(ParserSym.CLOSE_CURLY_BRACE); }
   {Comment}                                 { return symbol(ParserSym.EOF); }
+
   {StringConstant}
       {
           if (yytext().length() > MAX_LENGTH)

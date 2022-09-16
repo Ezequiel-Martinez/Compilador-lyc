@@ -13,9 +13,23 @@ terminal MULT;
 terminal DIV;
 terminal OPEN_BRACKET;
 terminal CLOSE_BRACKET;
+terminal OPEN_CURLY_BRACE;
+terminal CLOSE_CURLY_BRACE;
 terminal INTEGER_CONSTANT;
 terminal IDENTIFIER;
 terminal STRING_CONSTANT;
+terminal CONDITIONAL;
+terminal ELSE;
+terminal GREATER;
+terminal LESS;
+terminal GREATER_OR_EQUAL;
+terminal LESS_OR_EQUAL;
+terminal DISTINCT;
+terminal EQUAL;
+terminal WRITE;
+terminal AND;
+terminal OR;
+terminal NOT;
 
 // Non Terminals
 non terminal sentence;
@@ -23,6 +37,13 @@ non terminal assignment;
 non terminal expression;
 non terminal term;
 non terminal factor;
+non terminal conditional;
+non terminal argument;
+non terminal block;
+non terminal trueCase;
+non terminal falseCase;
+non terminal subArgument;
+non terminal comparator;
 
 // Start Symbol Definition
 start with sentence;
@@ -38,3 +59,32 @@ term ::= factor {: System.out.println("Term = factor"); :};
 factor ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
 factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant ); :};
 factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
+
+
+//sentence ::= conditional {: System.out.println("End"); :};
+//conditional ::= trueCase falseCase {: System.out.println("Conditional if else"); :};
+//conditional ::= trueCase {: System.out.println("Conditional if"); :};
+//trueCase ::= CONDITIONAL OPEN_BRACKET argument CLOSE_BRACKET
+//            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("TrueCase"); :};
+//falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("FalseCase"); :};
+//argument ::= IDENTIFIER GREATER IDENTIFIER {: System.out.println("Argument"); :} ;
+//block ::= WRITE OPEN_BRACKET STRING_CONSTANT CLOSE_BRACKET {: System.out.println("Block"); :} ;
+
+
+sentence ::= conditional {: System.out.println("End"); :};
+conditional ::= trueCase falseCase {: System.out.println("Conditional if else"); :};
+conditional ::= trueCase {: System.out.println("Conditional if"); :};
+trueCase ::= CONDITIONAL OPEN_BRACKET argument CLOSE_BRACKET
+            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("TrueCase"); :};
+falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("FalseCase"); :};
+argument ::= argument AND subArgument {: System.out.println("Argument with and"); :} ;
+argument ::= argument OR subArgument {: System.out.println("Argument with or"); :} ;
+argument ::= subArgument {: System.out.println("Argument"); :} ;
+subArgument ::= factor GREATER factor {: System.out.println("Sub argument with greater"); :} ;
+subArgument ::= factor GREATER_OR_EQUAL factor {: System.out.println("Sub argument with greater or equal"); :} ;
+subArgument ::= factor LESS factor {: System.out.println("Sub argument with less"); :} ;
+subArgument ::= factor LESS_OR_EQUAL factor {: System.out.println("Sub argument with less or equal"); :} ;
+subArgument ::= factor EQUAL factor {: System.out.println("Sub argument with equal"); :} ;
+subArgument ::= factor DISTINCT factor {: System.out.println("Sub argument with distinct"); :} ;
+block ::= WRITE OPEN_BRACKET STRING_CONSTANT CLOSE_BRACKET {: System.out.println("Block"); :} ;
+
