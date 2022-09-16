@@ -18,7 +18,6 @@ import static lyc.compiler.constants.Constants.MAX_LENGTH;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
-@Disabled
 public class LexerTest {
 
   private Lexer lexer;
@@ -28,6 +27,30 @@ public class LexerTest {
   public void comment() throws Exception{
     scan("/*This is a comment*/");
     assertThat(nextToken()).isEqualTo(ParserSym.EOF);
+  }
+
+  @Test
+  public void commentWithSpecialCharacters() throws Exception{
+    scan("/*hola&*   --+ aksr 3242 * sg / %*/");
+    assertThat(nextToken()).isEqualTo(ParserSym.EOF);
+  }
+
+  @Test
+  public void emptyComment() throws Exception{
+    scan("/**/");
+    assertThat(nextToken()).isEqualTo(ParserSym.EOF);
+  }
+
+  @Test
+  public void commentWithNewLines() throws Exception{
+    scan("/*\n\n\n\t\r\n\n\n*/");
+    assertThat(nextToken()).isEqualTo(ParserSym.EOF);
+  }
+
+  @Test
+  public void string() throws Exception{
+    scan("\"hola este es un string < 30\"");
+    assertThat(nextToken()).isEqualTo(ParserSym.STRING_CONSTANT);
   }
 
   @Test
@@ -56,6 +79,7 @@ public class LexerTest {
 
   @Test
   public void invalidNegativeIntegerConstantValue() {
+    System.out.println("Corriendo test del long negativo");
     assertThrows(InvalidIntegerException.class, () -> {
       scan("%d".formatted(-9223372036854775807L));
       nextToken();

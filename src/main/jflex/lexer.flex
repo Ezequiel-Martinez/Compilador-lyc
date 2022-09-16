@@ -42,10 +42,16 @@ OpenBracket = "("
 CloseBracket = ")"
 Letter = [a-zA-Z]
 Digit = [0-9]
+InicioComentario = "/*"
+FinComentario = "*/"
+AnyCharacter = [^]
+StringDelimiter = "\""
 
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
 IntegerConstant = {Digit}+
+Comment = {InicioComentario} ({AnyCharacter})* {FinComentario}
+StringConstant = {StringDelimiter} ({AnyCharacter})* {StringDelimiter}
 
 %%
 
@@ -54,9 +60,22 @@ IntegerConstant = {Digit}+
 
 <YYINITIAL> {
   /* identifiers */
-  {Identifier}                             { return symbol(ParserSym.IDENTIFIER, yytext()); }
+  {Identifier}
+      {
+          if (yytext().length() > MAX_LENGTH)
+            { throw new InvalidLengthException(yytext()); }
+          else
+            { return symbol(ParserSym.IDENTIFIER, yytext()); }
+      }
   /* Constants */
-  {IntegerConstant}                        { return symbol(ParserSym.INTEGER_CONSTANT, yytext()); }
+  {IntegerConstant}
+      {
+          if(Long.valueOf(yytext()) > Integer.MAX_VALUE || (Long.valueOf(yytext()) < Integer.MIN_VALUE))
+            {
+                throw new InvalidIntegerException(yytext()); }
+          else
+            { return symbol(ParserSym.INTEGER_CONSTANT, yytext()); }
+      }
 
   /* operators */
   {Plus}                                    { return symbol(ParserSym.PLUS); }
@@ -66,6 +85,16 @@ IntegerConstant = {Digit}+
   {Assig}                                   { return symbol(ParserSym.ASSIG); }
   {OpenBracket}                             { return symbol(ParserSym.OPEN_BRACKET); }
   {CloseBracket}                            { return symbol(ParserSym.CLOSE_BRACKET); }
+  {Comment}                                 { return symbol(ParserSym.EOF); }
+  {StringConstant}
+      {
+          if (yytext().length() > MAX_LENGTH)
+            { throw new InvalidLengthException(yytext()); }
+          else
+            { return symbol(ParserSym.STRING_CONSTANT); }
+      }
+
+
 
   /* whitespace */
   {WhiteSpace}                   { /* ignore */ }
