@@ -43,7 +43,7 @@ public class LexerTest {
 
   @Test
   public void commentWithNewLines() throws Exception{
-    scan("/*\n\n\n\t\r\n\n\n*/");
+    scan("/* \n\n\n\t\r\n\n\n */");
     assertThat(nextToken()).isEqualTo(ParserSym.EOF);
   }
 
@@ -89,7 +89,7 @@ public class LexerTest {
 
   @Test
   public void assignmentWithExpressions() throws Exception {
-    scan("c=d*(e-21)/4");
+    scan("c = d * (e - 21) / 4");
     assertThat(nextToken()).isEqualTo(ParserSym.IDENTIFIER);
     assertThat(nextToken()).isEqualTo(ParserSym.ASSIG);
     assertThat(nextToken()).isEqualTo(ParserSym.IDENTIFIER);

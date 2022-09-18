@@ -46,6 +46,9 @@ Distinct = "!="
 Equal = "=="
 And = "&"
 Or = "||"
+DoubleDot = ":"
+Comma = ","
+Dot = "."
 OpenBracket = "("
 CloseBracket = ")"
 OpenCurlyBrace = "{"
@@ -58,15 +61,28 @@ AnyCharacter = [^]
 AnyCharacterExceptDoubleQuotes = [^\"]
 StringDelimiter = "\""
 
+While = while|WHILE
 Conditional = if|IF
 Else = else|ELSE
 Write = write|WRITE
+Read = read|READ
 Not = not|NOT
+Init = init|INIT
+Float = Float
+Int = Int
+StringDataType = String
+Do = do|DO
+Case = case|CASE
+Default = default|DEFAULT
+EndDo = enddo|ENDDO
+Repeat = repeat|REPEAT
+
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
-IntegerConstant = {Digit}+
+IntegerConstant = {Sub}?{Digit}+
 Comment = {InicioComentario} ({AnyCharacter})* {FinComentario}
 StringConstant = {StringDelimiter} ({AnyCharacterExceptDoubleQuotes})* {StringDelimiter}
+FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
 
 %%
 
@@ -75,10 +91,21 @@ StringConstant = {StringDelimiter} ({AnyCharacterExceptDoubleQuotes})* {StringDe
 
 <YYINITIAL> {
   /* reserved words */
+  {While}                                   { return symbol(ParserSym.WHILE); }
   {Conditional}                             { return symbol(ParserSym.CONDITIONAL); }
   {Else}                                    { return symbol(ParserSym.ELSE); }
   {Write}                                   { return symbol(ParserSym.WRITE); }
+  {Read}                                    { return symbol(ParserSym.READ); }
   {Not}                                     { return symbol(ParserSym.NOT); }
+  {Init}                                    { return symbol(ParserSym.INIT); }
+  {Float}                                   { return symbol(ParserSym.FLOAT); }
+  {StringDataType}                          { return symbol(ParserSym.STRING_DATA_TYPE); }
+  {Int}                                     { return symbol(ParserSym.INT); }
+  {Do}                                      { return symbol(ParserSym.DO); }
+  {Case}                                    { return symbol(ParserSym.CASE); }
+  {Default}                                 { return symbol(ParserSym.DEFAULT); }
+  {EndDo}                                   { return symbol(ParserSym.ENDDO); }
+  {Repeat}                                  { return symbol(ParserSym.REPEAT); }
 
   /* identifiers */
   {Identifier}
@@ -98,6 +125,8 @@ StringConstant = {StringDelimiter} ({AnyCharacterExceptDoubleQuotes})* {StringDe
           else
             { return symbol(ParserSym.INTEGER_CONSTANT, yytext()); }
       }
+
+  {FloatConstant}                           { return symbol(ParserSym.FLOAT_CONSTANT, yytext()); }
 
 
 
@@ -119,11 +148,13 @@ StringConstant = {StringDelimiter} ({AnyCharacterExceptDoubleQuotes})* {StringDe
   {CloseBracket}                            { return symbol(ParserSym.CLOSE_BRACKET); }
   {OpenCurlyBrace}                          { return symbol(ParserSym.OPEN_CURLY_BRACE); }
   {CloseCurlyBrace}                         { return symbol(ParserSym.CLOSE_CURLY_BRACE); }
-  {Comment}                                 { return symbol(ParserSym.EOF); }
+  {DoubleDot}                               { return symbol(ParserSym.DOUBLE_DOT); }
+  {Comma}                                   { return symbol(ParserSym.COMMA); }
+  {Comment}                                 { /* ignore */ }
 
   {StringConstant}
       {
-          if (yytext().length() > MAX_LENGTH)
+          if (yytext().length() > 40)
             { throw new InvalidLengthException(yytext()); }
           else
             { return symbol(ParserSym.STRING_CONSTANT); }

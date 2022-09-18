@@ -1,0 +1,19 @@
+DO a
+CASE (a == 101)
+{
+    write("a > b & c > b")
+    a = .9999
+}
+CASE (a > 202)
+{
+    write("a > b & c > b")
+    a = 1234
+    a = ".9999"
+}
+DEFAULT
+{
+    write("a > b & c > b")
+    a = 1234
+    a = "1234 + b"
+}
+ENDDO

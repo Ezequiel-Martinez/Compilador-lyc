@@ -18,6 +18,7 @@ terminal CLOSE_CURLY_BRACE;
 terminal INTEGER_CONSTANT;
 terminal IDENTIFIER;
 terminal STRING_CONSTANT;
+terminal WHILE;
 terminal CONDITIONAL;
 terminal ELSE;
 terminal GREATER;
@@ -27,29 +28,77 @@ terminal LESS_OR_EQUAL;
 terminal DISTINCT;
 terminal EQUAL;
 terminal WRITE;
+terminal READ;
 terminal AND;
 terminal OR;
 terminal NOT;
+terminal INIT;
+terminal DOUBLE_DOT;
+terminal FLOAT;
+terminal INT;
+terminal STRING_DATA_TYPE;
+terminal COMMA;
+terminal FLOAT_CONSTANT;
+terminal DO;
+terminal CASE;
+terminal DEFAULT;
+terminal ENDDO;
+terminal REPEAT;
 
 // Non Terminals
+non terminal ss;
+non terminal block;
 non terminal sentence;
 non terminal assignment;
 non terminal expression;
 non terminal term;
 non terminal factor;
+non terminal while;
 non terminal conditional;
-non terminal argument;
-non terminal block;
 non terminal trueCase;
 non terminal falseCase;
+non terminal argument;
 non terminal subArgument;
-non terminal comparator;
+non terminal read;
+non terminal write;
+non terminal content;
+non terminal init_;
+non terminal declaration;
+non terminal variableList;
+non terminal declarationBlock;
+non terminal doCase;
+non terminal cases;
+non terminal case;
+non terminal default;
+non terminal do;
+non terminal repeat;
 
 // Start Symbol Definition
-start with sentence;
+start with ss;
 
-sentence ::= assignment {: System.out.println("End"); :};
+ss ::= block {: System.out.println("START SYMBOL"); :};
+block ::= block sentence;
+block ::= sentence {: System.out.println("Bloque"); :};
+
+
+//READ-------------------------
+sentence ::= read {: System.out.println("sentence"); :};
+read ::= READ OPEN_BRACKET content CLOSE_BRACKET {: System.out.println("Read"); :};
+
+//WRITE------------------------
+sentence ::= write {: System.out.println("sentence"); :};
+write ::= WRITE OPEN_BRACKET content CLOSE_BRACKET {: System.out.println("Write"); :};
+
+//CONTENT---------------------
+content ::= IDENTIFIER {: System.out.println("ID"); :};
+content ::= STRING_CONSTANT {: System.out.println("String"); :};
+content ::= FLOAT_CONSTANT {: System.out.println("Float"); :};
+content ::= INTEGER_CONSTANT {: System.out.println("Integer"); :};
+
+//ASIGNACION------------------------
+sentence ::= assignment {: System.out.println("sentencia"); :};
 assignment ::= IDENTIFIER ASSIG expression {: System.out.println("Assignment"); :};
+assignment ::= IDENTIFIER ASSIG STRING_CONSTANT {: System.out.println("Assignment with String"); :};
 expression ::= expression PLUS term {: System.out.println("+"); :};
 expression ::= expression SUB term {: System.out.println("-"); :};
 expression ::= term {: System.out.println("Expression = Term"); :};
@@ -57,34 +106,60 @@ term ::= term MULT factor {: System.out.println("*"); :};
 term ::= term DIV factor {: System.out.println("/"); :};
 term ::= factor {: System.out.println("Term = factor"); :};
 factor ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
-factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant ); :};
+factor ::= INTEGER_CONSTANT:constant {: System.out.println("Integer constant: " + constant ); :};
+factor ::= FLOAT_CONSTANT:constant {: System.out.println("Float constant: " + constant ); :};
 factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
 
-
-//sentence ::= conditional {: System.out.println("End"); :};
-//conditional ::= trueCase falseCase {: System.out.println("Conditional if else"); :};
-//conditional ::= trueCase {: System.out.println("Conditional if"); :};
-//trueCase ::= CONDITIONAL OPEN_BRACKET argument CLOSE_BRACKET
-//            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("TrueCase"); :};
-//falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("FalseCase"); :};
-//argument ::= IDENTIFIER GREATER IDENTIFIER {: System.out.println("Argument"); :} ;
-//block ::= WRITE OPEN_BRACKET STRING_CONSTANT CLOSE_BRACKET {: System.out.println("Block"); :} ;
-
-
-sentence ::= conditional {: System.out.println("End"); :};
+//IF------------------------------
+sentence ::= conditional {: System.out.println("sentencia"); :};
 conditional ::= trueCase falseCase {: System.out.println("Conditional if else"); :};
 conditional ::= trueCase {: System.out.println("Conditional if"); :};
 trueCase ::= CONDITIONAL OPEN_BRACKET argument CLOSE_BRACKET
             OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("TrueCase"); :};
 falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("FalseCase"); :};
+
+//WHILE---------------------------
+sentence ::= while {: System.out.println("sentencia"); :};
+while ::= WHILE OPEN_BRACKET argument CLOSE_BRACKET
+            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("while"); :};
+
+// INIT ------------------------------
+sentence ::= init_ {: System.out.println("sentencia"); :};
+init_ ::= INIT OPEN_CURLY_BRACE declarationBlock CLOSE_CURLY_BRACE {: System.out.println("init"); :};
+declarationBlock ::= declarationBlock declaration {: System.out.println("Declaration block"); :};
+declarationBlock ::= declaration {: System.out.println("Declaration block"); :};
+declaration ::= variableList DOUBLE_DOT FLOAT {: System.out.println("Variable declaration with Float"); :};
+declaration ::= variableList DOUBLE_DOT INT {: System.out.println("Variable declaration with Int"); :};
+declaration ::= variableList DOUBLE_DOT STRING_DATA_TYPE {: System.out.println("Variable declaration with String"); :};
+variableList ::= variableList COMMA IDENTIFIER:id  {: System.out.println("Id: " + id); :};
+variableList ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
+
+
+// DO CASE ---------------------------
+sentence ::= doCase {: System.out.println("sentence"); :};
+doCase ::= do default ENDDO {: System.out.println("DO CASE DEFAULT"); :};
+doCase ::= do ENDDO {: System.out.println("DO CASE"); :};
+do ::= DO IDENTIFIER cases {: System.out.println("DO"); :};
+cases ::= cases case {: System.out.println("cases"); :};
+cases ::= case;
+case ::= CASE OPEN_BRACKET argument CLOSE_BRACKET
+         OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("case"); :};
+default ::= DEFAULT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("DEFAULT"); :};
+
+
+// REPEAT INLINE -----------------------
+sentence ::= repeat {: System.out.println("sentence"); :};
+repeat ::= REPEAT INTEGER_CONSTANT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("repeat"); :};
+
+
+//ARGUMENTOS---------------------------
 argument ::= argument AND subArgument {: System.out.println("Argument with and"); :} ;
 argument ::= argument OR subArgument {: System.out.println("Argument with or"); :} ;
 argument ::= subArgument {: System.out.println("Argument"); :} ;
+subArgument ::= NOT subArgument {: System.out.println("Argument with NOT"); :} ;
 subArgument ::= factor GREATER factor {: System.out.println("Sub argument with greater"); :} ;
 subArgument ::= factor GREATER_OR_EQUAL factor {: System.out.println("Sub argument with greater or equal"); :} ;
 subArgument ::= factor LESS factor {: System.out.println("Sub argument with less"); :} ;
 subArgument ::= factor LESS_OR_EQUAL factor {: System.out.println("Sub argument with less or equal"); :} ;
 subArgument ::= factor EQUAL factor {: System.out.println("Sub argument with equal"); :} ;
 subArgument ::= factor DISTINCT factor {: System.out.println("Sub argument with distinct"); :} ;
-block ::= WRITE OPEN_BRACKET STRING_CONSTANT CLOSE_BRACKET {: System.out.println("Block"); :} ;
-
