@@ -84,6 +84,11 @@ public class ParserTest {
         compilationSuccessful(readFromFile("repeatInline.txt"));
     }
 
+    @Test
+    void ifAnidado() throws Exception {
+        compilationSuccessful(readFromFile("ifAnidado.txt"));
+    }
+
 
     private void compilationSuccessful(String input) throws Exception {
         assertThat(scan(input).sym).isEqualTo(ParserSym.EOF);
