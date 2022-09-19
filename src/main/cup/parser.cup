@@ -1,9 +1,18 @@
 package lyc.compiler;
 
 import java_cup.runtime.*;
+import java.util.List;
+import java.util.ArrayList;
+import lyc.compiler.table.*;
+import java.util.HashMap;
 
 class Parser;
 
+action code {:
+    HashMap<String, SymbolEntry> symbolTable = SymbolTableManager.symbolTable;
+    List<String> idList = new ArrayList<>();
+    DataType dataType;
+:}
 
 // Terminals
 terminal ASSIG;
@@ -72,11 +81,12 @@ non terminal case;
 non terminal default;
 non terminal do;
 non terminal repeat;
+non terminal data_type;
 
 // Start Symbol Definition
 start with ss;
 
-ss ::= block {: System.out.println("START SYMBOL"); :};
+ss ::= block | {: System.out.println("START SYMBOL"); :};
 block ::= block sentence;
 block ::= sentence {: System.out.println("Bloque"); :};
 
@@ -128,11 +138,39 @@ sentence ::= init_ {: System.out.println("sentencia"); :};
 init_ ::= INIT OPEN_CURLY_BRACE declarationBlock CLOSE_CURLY_BRACE {: System.out.println("init"); :};
 declarationBlock ::= declarationBlock declaration {: System.out.println("Declaration block"); :};
 declarationBlock ::= declaration {: System.out.println("Declaration block"); :};
-declaration ::= variableList DOUBLE_DOT FLOAT {: System.out.println("Variable declaration with Float"); :};
-declaration ::= variableList DOUBLE_DOT INT {: System.out.println("Variable declaration with Int"); :};
-declaration ::= variableList DOUBLE_DOT STRING_DATA_TYPE {: System.out.println("Variable declaration with String"); :};
-variableList ::= variableList COMMA IDENTIFIER:id  {: System.out.println("Id: " + id); :};
-variableList ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
+declaration ::= variableList DOUBLE_DOT data_type{:
+    System.out.println("Ejecutando el for");
+
+    for (String id : idList) {
+        System.out.println("Id de idList: " + id);
+        System.out.println("dataType: " + dataType);
+        SymbolTableManager.setDataTypeInTable(id, dataType);
+    }
+    System.out.println("Terminando el for");
+    idList.removeAll(idList);
+    System.out.println("Terminando el remove");
+:};
+data_type ::=
+              INT {:
+                System.out.println("Int data type");
+                dataType = DataType.INTEGER_TYPE;
+            :}
+            | FLOAT {:
+                System.out.println("Float data type");
+                dataType = DataType.FLOAT_TYPE;
+            :}
+            | STRING_DATA_TYPE {:
+                System.out.println("String data type");
+                dataType = DataType.STRING_TYPE;
+            :};
+variableList ::= variableList COMMA IDENTIFIER:id {:
+    System.out.println("ID declared: " + id);
+    idList.add(id.toString());
+:} ;
+variableList ::= IDENTIFIER:id {:
+    System.out.println("ID declared: " + id);
+    idList.add(id.toString());
+ :};
 
 
 // DO CASE ---------------------------

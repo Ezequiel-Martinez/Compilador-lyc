@@ -2,7 +2,7 @@ package lyc.compiler;
 
 import java_cup.runtime.Symbol;
 import lyc.compiler.ParserSym;
-import lyc.compiler.model.*;
+import lyc.compiler.model.*;import lyc.compiler.table.DataType;import lyc.compiler.table.SymbolEntry;import lyc.compiler.table.SymbolTableManager;
 import static lyc.compiler.constants.Constants.*;
 
 %%
@@ -26,6 +26,7 @@ import static lyc.compiler.constants.Constants.*;
   private Symbol symbol(int type, Object value) {
     return new Symbol(type, yyline, yycolumn, value);
   }
+  StringBuffer stringBuffer;
 %}
 
 
@@ -80,7 +81,9 @@ Repeat = repeat|REPEAT
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
 IntegerConstant = {Sub}?{Digit}+
-Comment = {InicioComentario} ({AnyCharacter})* {FinComentario}
+
+Comment = {InicioComentario} [^*] ~{FinComentario} | {InicioComentario} "*"+ "/"
+
 StringConstant = {StringDelimiter} ({AnyCharacterExceptDoubleQuotes})* {StringDelimiter}
 FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
 
@@ -112,21 +115,43 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
       {
           if (yytext().length() > MAX_LENGTH)
             { throw new InvalidLengthException(yytext()); }
-          else
-            { return symbol(ParserSym.IDENTIFIER, yytext()); }
+
+          if(!SymbolTableManager.existsInTable(yytext()))
+          {
+            SymbolEntry entry = new SymbolEntry(yytext());
+            SymbolTableManager.insertInTable(entry);
+          }
+
+          return symbol(ParserSym.IDENTIFIER, yytext());
       }
 
   /* Constants */
   {IntegerConstant}
       {
           if(Long.valueOf(yytext()) > Integer.MAX_VALUE || (Long.valueOf(yytext()) < Integer.MIN_VALUE))
-            {
-                throw new InvalidIntegerException(yytext()); }
-          else
-            { return symbol(ParserSym.INTEGER_CONSTANT, yytext()); }
+            { throw new InvalidIntegerException(yytext()); }
+
+          if(!SymbolTableManager.existsInTable(yytext()))
+          {
+            SymbolEntry entry = new SymbolEntry("_"+yytext(), DataType.INTEGER_CONS, yytext());
+            SymbolTableManager.insertInTable(entry);
+          }
+
+          return symbol(ParserSym.INTEGER_CONSTANT, yytext());
       }
 
-  {FloatConstant}                           { return symbol(ParserSym.FLOAT_CONSTANT, yytext()); }
+  {FloatConstant}
+      {
+
+          if(!SymbolTableManager.existsInTable(yytext()))
+          {
+            SymbolEntry entry = new SymbolEntry("_"+yytext(), DataType.FLOAT_CONS, yytext());
+            SymbolTableManager.insertInTable(entry);
+          }
+
+          return symbol(ParserSym.FLOAT_CONSTANT, yytext());
+
+      }
 
 
 
@@ -150,14 +175,26 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
   {CloseCurlyBrace}                         { return symbol(ParserSym.CLOSE_CURLY_BRACE); }
   {DoubleDot}                               { return symbol(ParserSym.DOUBLE_DOT); }
   {Comma}                                   { return symbol(ParserSym.COMMA); }
-  {Comment}                                 { /* ignore */ }
 
   {StringConstant}
       {
-          if (yytext().length() > 40)
+          stringBuffer = new StringBuffer(yytext());
+
+          if (yytext().length() > STRING_MAX_LENGTH + 2) // las comillas cuentan como dos caracteres
             { throw new InvalidLengthException(yytext()); }
-          else
-            { return symbol(ParserSym.STRING_CONSTANT); }
+
+          stringBuffer.replace(0,1, "");
+          stringBuffer.replace(stringBuffer.length()-1,stringBuffer.length(), ""); //trim extra quotes
+
+          if(!SymbolTableManager.existsInTable(yytext()))
+          {
+            SymbolEntry entry = new SymbolEntry("_" + stringBuffer.toString(), DataType.STRING_CONS, stringBuffer.toString(), Integer.toString(stringBuffer.length()));
+            SymbolTableManager.insertInTable(entry);
+          }
+
+          return symbol(ParserSym.STRING_CONSTANT);
+
+
       }
 
 
@@ -165,6 +202,8 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
   /* whitespace */
   {WhiteSpace}                   { /* ignore */ }
 }
+
+    {Comment}                                 { /* ignore */ }
 
 
 /* error fallback */

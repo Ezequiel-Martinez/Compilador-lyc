@@ -5,5 +5,5 @@ REPEAT 15
     /* write"a > b & c > b") */
 
     a = 1234
-    a = ".9999"
+    a = "uihbiugiyu"
 }

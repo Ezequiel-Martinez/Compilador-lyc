@@ -3,6 +3,7 @@ package lyc.compiler;
 import java_cup.runtime.Symbol;
 import lyc.compiler.factories.ParserFactory;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 public class ParserTest {
 
@@ -39,10 +41,10 @@ public class ParserTest {
         compilationSuccessful(readFromFile("read.txt"));
     }
 
-//    @Test
-//    void comment() throws Exception {
-//        compilationSuccessful(readFromFile("comment.txt"));
-//    }
+    @Test
+    void comment() throws Exception {
+        compilationSuccessful(readFromFile("comment.txt"));
+    }
 
     @Test
     void init() throws Exception {
