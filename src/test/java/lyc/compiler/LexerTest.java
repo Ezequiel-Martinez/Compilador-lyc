@@ -77,6 +77,14 @@ public class LexerTest {
     });
   }
 
+//  @Test
+//  public void invalidPositiveFloatConstantValue() {
+//    assertThrows(InvalidLengthException.class, () -> {
+//      scan("%f".formatted(465.2165468498444));
+//      nextToken();
+//    });
+//  }
+
   @Test
   public void invalidNegativeIntegerConstantValue() {
     System.out.println("Corriendo test del long negativo");

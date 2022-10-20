@@ -2,7 +2,10 @@ package lyc.compiler;
 
 import java_cup.runtime.Symbol;
 import lyc.compiler.ParserSym;
-import lyc.compiler.model.*;import lyc.compiler.table.DataType;import lyc.compiler.table.SymbolEntry;import lyc.compiler.table.SymbolTableManager;
+import lyc.compiler.model.*;
+import lyc.compiler.table.DataType;
+import lyc.compiler.table.SymbolEntry;
+import lyc.compiler.table.SymbolTableManager;
 import static lyc.compiler.constants.Constants.*;
 
 %%
@@ -142,14 +145,49 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
 
   {FloatConstant}
       {
+          String[] num = yytext().split("\\.");
+          String mantissa = null;
+          String exp = null;
 
-          if(!SymbolTableManager.existsInTable(yytext()))
+          if (yytext().charAt(0) == '.')
           {
-            SymbolEntry entry = new SymbolEntry("_"+yytext(), DataType.FLOAT_CONS, yytext());
-            SymbolTableManager.insertInTable(entry);
+              mantissa = num[0];
+          }
+          else if (yytext().charAt(yytext().length() - 1) == '.')
+          {
+              exp = num[0];
+          }
+          else
+          {
+            exp = num[0];
+            mantissa = num[1];
           }
 
-          return symbol(ParserSym.FLOAT_CONSTANT, yytext());
+        if (exp != null)
+        {
+            if (exp.length() > 0)
+            {
+               if (Integer.parseInt(exp) > 9999)
+                   throw new InvalidLengthException("Exponent out of range: " + yytext());
+            }
+        }
+
+        if (mantissa != null)
+        {
+            if (mantissa.length() > 0)
+            {
+                if (Integer.parseInt(mantissa) > 16777216)
+                    throw new InvalidLengthException("Mantissa out of range: " + yytext());
+            }
+        }
+
+        if (!SymbolTableManager.existsInTable(yytext()))
+        {
+            SymbolEntry entry = new SymbolEntry("_" + yytext(), DataType.FLOAT_CONS, yytext());
+            SymbolTableManager.insertInTable(entry);
+        }
+
+        return symbol(ParserSym.FLOAT_CONSTANT, yytext());
 
       }
 
@@ -181,9 +219,9 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
           stringBuffer = new StringBuffer(yytext());
 
           if (yytext().length() > STRING_MAX_LENGTH + 2) // las comillas cuentan como dos caracteres
-            { throw new InvalidLengthException(yytext()); }
+            { throw new InvalidLengthException("String " + yytext() + " supera la longitud máxima permitida\nLongitud de string = " + yytext().length() + "\nLongitud máxima permitida = " + STRING_MAX_LENGTH ); }
 
-          stringBuffer.replace(0,1, "");
+          stringBuffer.replace(0, 1, "");
           stringBuffer.replace(stringBuffer.length()-1,stringBuffer.length(), ""); //trim extra quotes
 
           if(!SymbolTableManager.existsInTable(yytext()))

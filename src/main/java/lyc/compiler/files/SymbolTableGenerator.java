@@ -17,7 +17,6 @@ public class SymbolTableGenerator implements FileGenerator{
 
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
-        System.out.println("PUTOOOOO las keys??");
         List<String> keys = new ArrayList<>(symbolTable.keySet());
         Collections.sort(keys);
         Collections.reverse(keys);

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.ArrayList;
 import lyc.compiler.table.*;
 import java.util.HashMap;
+import lyc.compiler.arbol.ArbolGenerator;
+import lyc.compiler.arbol.Node;
 
 class Parser;
 
@@ -12,6 +14,22 @@ action code {:
     HashMap<String, SymbolEntry> symbolTable = SymbolTableManager.symbolTable;
     List<String> idList = new ArrayList<>();
     DataType dataType;
+
+    Node factor_ptr = new Node();
+    Node term_ptr = new Node();
+    Node expression_ptr = new Node();
+    Node assignment_ptr = new Node();
+    Node sentence_ptr = new Node();
+//    Node factor_ptr = new Node();
+//    Node factor_ptr = new Node();
+//    Node factor_ptr = new Node();
+//    Node factor_ptr = new Node();
+//    Node factor_ptr = new Node();
+//    Node factor_ptr = new Node();
+//    Node factor_ptr = new Node();
+//    Node factor_ptr = new Node();
+
+
 :}
 
 // Terminals
@@ -86,58 +104,116 @@ non terminal data_type;
 // Start Symbol Definition
 start with ss;
 
-ss ::= block | {: System.out.println("START SYMBOL"); :};
+ss ::= block | {: 
+	System.out.println("START SYMBOL"); :};
 block ::= block sentence;
-block ::= sentence {: System.out.println("Bloque"); :};
+block ::= sentence {: 
+	System.out.println("Bloque"); :};
 
 
 //READ-------------------------
-sentence ::= read {: System.out.println("sentence"); :};
-read ::= READ OPEN_BRACKET content CLOSE_BRACKET {: System.out.println("Read"); :};
+sentence ::= read {: 
+	System.out.println("sentence"); :};
+read ::= READ OPEN_BRACKET content CLOSE_BRACKET {: 
+	System.out.println("Read"); :};
 
 //WRITE------------------------
-sentence ::= write {: System.out.println("sentence"); :};
-write ::= WRITE OPEN_BRACKET content CLOSE_BRACKET {: System.out.println("Write"); :};
+sentence ::= write {: 
+	System.out.println("sentence"); :};
+write ::= WRITE OPEN_BRACKET content CLOSE_BRACKET {: 
+	System.out.println("Write"); :};
 
 //CONTENT---------------------
-content ::= IDENTIFIER {: System.out.println("ID"); :};
-content ::= STRING_CONSTANT {: System.out.println("String"); :};
-content ::= FLOAT_CONSTANT {: System.out.println("Float"); :};
-content ::= INTEGER_CONSTANT {: System.out.println("Integer"); :};
+content ::= IDENTIFIER {: 
+	System.out.println("ID"); :};
+content ::= STRING_CONSTANT {: 
+	System.out.println("String"); :};
+content ::= FLOAT_CONSTANT {: 
+	System.out.println("Float"); :};
+content ::= INTEGER_CONSTANT {: 
+	System.out.println("Integer"); :};
 
 //ASIGNACION------------------------
-sentence ::= assignment {: System.out.println("sentencia"); :};
-assignment ::= IDENTIFIER ASSIG expression {: System.out.println("Assignment"); :};
-assignment ::= IDENTIFIER ASSIG STRING_CONSTANT {: System.out.println("Assignment with String"); :};
-expression ::= expression PLUS term {: System.out.println("+"); :};
-expression ::= expression SUB term {: System.out.println("-"); :};
-expression ::= term {: System.out.println("Expression = Term"); :};
-term ::= term MULT factor {: System.out.println("*"); :};
-term ::= term DIV factor {: System.out.println("/"); :};
-term ::= factor {: System.out.println("Term = factor"); :};
-factor ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
-factor ::= INTEGER_CONSTANT:constant {: System.out.println("Integer constant: " + constant ); :};
-factor ::= FLOAT_CONSTANT:constant {: System.out.println("Float constant: " + constant ); :};
-factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
+sentence ::= assignment {: 
+	System.out.println("sentencia");
+    sentence_ptr = assignment_ptr;
+	:};
+assignment ::= IDENTIFIER:id ASSIG expression {:
+	System.out.println("Assignment");
+	assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString()), expression_ptr);
+	:};
+assignment ::= IDENTIFIER:id ASSIG STRING_CONSTANT:str {:
+	System.out.println("Assignment with String");
+    assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString()), ArbolGenerator.crearHoja(str.toString()));
+	:};
+expression ::= expression PLUS term {:
+	System.out.println("+");
+	expression_ptr = ArbolGenerator.crearNodo("+", expression_ptr, term_ptr);
+	:};
+expression ::= expression SUB term {:
+	System.out.println("-");
+    expression_ptr = ArbolGenerator.crearNodo("-", expression_ptr, term_ptr);
+	:};
+expression ::= term {: 
+	System.out.println("Expression = Term");
+    expression_ptr = term_ptr;
+	:};
+term ::= term MULT factor {:
+	System.out.println("*");
+    term_ptr = ArbolGenerator.crearNodo("*", term_ptr, factor_ptr);
+	:};
+term ::= term DIV:div factor {:
+	System.out.println(div);
+	term_ptr = ArbolGenerator.crearNodo(div.toString(), term_ptr, factor_ptr);
+	:};
+term ::= factor {: 
+	System.out.println("Term = factor");
+	term_ptr = factor_ptr;
+	:};
+factor ::= IDENTIFIER:id  {: 
+	System.out.println("Id: " + id);
+	factor_ptr = ArbolGenerator.crearHoja(id.toString());
+	:};
+factor ::= INTEGER_CONSTANT:constant {: 
+	System.out.println("Integer constant: " + constant );
+	factor_ptr = ArbolGenerator.crearHoja(constant.toString());
+	:};
+factor ::= FLOAT_CONSTANT:constant {: 
+	System.out.println("Float constant: " + constant );
+	factor_ptr = ArbolGenerator.crearHoja(constant.toString());
+	:};
+factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: 
+	System.out.println("Factor = (Expression)"); :};
 
 //IF------------------------------
-sentence ::= conditional {: System.out.println("sentencia"); :};
-conditional ::= trueCase falseCase {: System.out.println("Conditional if else"); :};
-conditional ::= trueCase {: System.out.println("Conditional if"); :};
+sentence ::= conditional {: 
+	System.out.println("sentencia"); :};
+conditional ::= trueCase falseCase {: 
+	System.out.println("Conditional if else"); :};
+conditional ::= trueCase {: 
+	System.out.println("Conditional if"); :};
 trueCase ::= CONDITIONAL OPEN_BRACKET argument CLOSE_BRACKET
-            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("TrueCase"); :};
-falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("FalseCase"); :};
+            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
+	System.out.println("TrueCase"); :};
+falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
+	System.out.println("FalseCase"); :};
 
 //WHILE---------------------------
-sentence ::= while {: System.out.println("sentencia"); :};
+sentence ::= while {: 
+	System.out.println("sentencia"); :};
 while ::= WHILE OPEN_BRACKET argument CLOSE_BRACKET
-            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("while"); :};
+            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
+	System.out.println("while"); :};
 
 // INIT ------------------------------
-sentence ::= init_ {: System.out.println("sentencia"); :};
-init_ ::= INIT OPEN_CURLY_BRACE declarationBlock CLOSE_CURLY_BRACE {: System.out.println("init"); :};
-declarationBlock ::= declarationBlock declaration {: System.out.println("Declaration block"); :};
-declarationBlock ::= declaration {: System.out.println("Declaration block"); :};
+sentence ::= init_ {: 
+	System.out.println("sentencia"); :};
+init_ ::= INIT OPEN_CURLY_BRACE declarationBlock CLOSE_CURLY_BRACE {: 
+	System.out.println("init"); :};
+declarationBlock ::= declarationBlock declaration {: 
+	System.out.println("Declaration block"); :};
+declarationBlock ::= declaration {: 
+	System.out.println("Declaration block"); :};
 declaration ::= variableList DOUBLE_DOT data_type{:
     System.out.println("Ejecutando el for");
 
@@ -174,30 +250,49 @@ variableList ::= IDENTIFIER:id {:
 
 
 // DO CASE ---------------------------
-sentence ::= doCase {: System.out.println("sentence"); :};
-doCase ::= do default ENDDO {: System.out.println("DO CASE DEFAULT"); :};
-doCase ::= do ENDDO {: System.out.println("DO CASE"); :};
-do ::= DO IDENTIFIER cases {: System.out.println("DO"); :};
-cases ::= cases case {: System.out.println("cases"); :};
+sentence ::= doCase {: 
+	System.out.println("sentence"); :};
+doCase ::= do default ENDDO {: 
+	System.out.println("DO CASE DEFAULT"); :};
+doCase ::= do ENDDO {: 
+	System.out.println("DO CASE"); :};
+do ::= DO IDENTIFIER cases {: 
+	System.out.println("DO"); :};
+cases ::= cases case {: 
+	System.out.println("cases"); :};
 cases ::= case;
 case ::= CASE OPEN_BRACKET argument CLOSE_BRACKET
-         OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("case"); :};
-default ::= DEFAULT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("DEFAULT"); :};
+         OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
+	System.out.println("case"); :};
+default ::= DEFAULT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
+	System.out.println("DEFAULT"); :};
 
 
 // REPEAT INLINE -----------------------
-sentence ::= repeat {: System.out.println("sentence"); :};
-repeat ::= REPEAT INTEGER_CONSTANT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: System.out.println("repeat"); :};
+sentence ::= repeat {: 
+	System.out.println("sentence"); :};
+repeat ::= REPEAT INTEGER_CONSTANT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
+	System.out.println("repeat"); :};
 
 
 //ARGUMENTOS---------------------------
-argument ::= argument AND subArgument {: System.out.println("Argument with and"); :} ;
-argument ::= argument OR subArgument {: System.out.println("Argument with or"); :} ;
-argument ::= subArgument {: System.out.println("Argument"); :} ;
-subArgument ::= NOT subArgument {: System.out.println("Argument with NOT"); :} ;
-subArgument ::= factor GREATER factor {: System.out.println("Sub argument with greater"); :} ;
-subArgument ::= factor GREATER_OR_EQUAL factor {: System.out.println("Sub argument with greater or equal"); :} ;
-subArgument ::= factor LESS factor {: System.out.println("Sub argument with less"); :} ;
-subArgument ::= factor LESS_OR_EQUAL factor {: System.out.println("Sub argument with less or equal"); :} ;
-subArgument ::= factor EQUAL factor {: System.out.println("Sub argument with equal"); :} ;
-subArgument ::= factor DISTINCT factor {: System.out.println("Sub argument with distinct"); :} ;
+argument ::= argument AND subArgument {: 
+	System.out.println("Argument with and"); :} ;
+argument ::= argument OR subArgument {: 
+	System.out.println("Argument with or"); :} ;
+argument ::= subArgument {: 
+	System.out.println("Argument"); :} ;
+subArgument ::= NOT subArgument {: 
+	System.out.println("Argument with NOT"); :} ;
+subArgument ::= factor GREATER factor {: 
+	System.out.println("Sub argument with greater"); :} ;
+subArgument ::= factor GREATER_OR_EQUAL factor {: 
+	System.out.println("Sub argument with greater or equal"); :} ;
+subArgument ::= factor LESS factor {: 
+	System.out.println("Sub argument with less"); :} ;
+subArgument ::= factor LESS_OR_EQUAL factor {: 
+	System.out.println("Sub argument with less or equal"); :} ;
+subArgument ::= factor EQUAL factor {: 
+	System.out.println("Sub argument with equal"); :} ;
+subArgument ::= factor DISTINCT factor {: 
+	System.out.println("Sub argument with distinct"); :} ;
