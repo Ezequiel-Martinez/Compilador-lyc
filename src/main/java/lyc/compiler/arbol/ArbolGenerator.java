@@ -26,7 +26,7 @@ public class ArbolGenerator {
     public static void printTree(String prefix, Node node, boolean isLeft)
     {
         if (node != null) {
-            printedTree += (prefix + (isLeft ? "|-- " : "\\-- ") + node.value + "\n");
+            printedTree += (prefix + (isLeft ? "|——> " : "\\——> ") + node.value + "\n");
             printTree(prefix + (isLeft ? "|   " : "    "), node.left, true);
             printTree(prefix + (isLeft ? "|   " : "    "), node.right, false);
         }

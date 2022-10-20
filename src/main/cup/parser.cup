@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.ArrayList;
 import lyc.compiler.table.*;
 import java.util.HashMap;
+import java.util.Stack;
 import lyc.compiler.arbol.ArbolGenerator;
 import lyc.compiler.arbol.Node;
 
@@ -14,19 +15,20 @@ action code {:
     HashMap<String, SymbolEntry> symbolTable = SymbolTableManager.symbolTable;
     List<String> idList = new ArrayList<>();
     DataType dataType;
+    Stack<Node> pila = new Stack<Node>();
 
     Node factor_ptr = new Node();
     Node term_ptr = new Node();
     Node expression_ptr = new Node();
     Node assignment_ptr = new Node();
     Node sentence_ptr = new Node();
-//    Node factor_ptr = new Node();
-//    Node factor_ptr = new Node();
-//    Node factor_ptr = new Node();
-//    Node factor_ptr = new Node();
-//    Node factor_ptr = new Node();
-//    Node factor_ptr = new Node();
-//    Node factor_ptr = new Node();
+    Node block_ptr = new Node();
+    Node ss_ptr = new Node();
+    Node subArgument_ptr = new Node();
+    Node argument_ptr = new Node();
+    Node conditional_ptr = new Node();
+    Node trueCase_ptr = new Node();
+    Node falseCase_ptr = new Node();
 //    Node factor_ptr = new Node();
 
 
@@ -105,10 +107,16 @@ non terminal data_type;
 start with ss;
 
 ss ::= block | {: 
-	System.out.println("START SYMBOL"); :};
-block ::= block sentence;
+	System.out.println("START SYMBOL");
+	ss_ptr = block_ptr;
+	:};
+block ::= block sentence {:
+    block_ptr = ArbolGenerator.crearNodo("Bloque", block_ptr, sentence_ptr);
+    :};
 block ::= sentence {: 
-	System.out.println("Bloque"); :};
+	System.out.println("Bloque");
+    block_ptr = sentence_ptr;
+	:};
 
 
 //READ-------------------------
@@ -162,9 +170,9 @@ term ::= term MULT factor {:
 	System.out.println("*");
     term_ptr = ArbolGenerator.crearNodo("*", term_ptr, factor_ptr);
 	:};
-term ::= term DIV:div factor {:
-	System.out.println(div);
-	term_ptr = ArbolGenerator.crearNodo(div.toString(), term_ptr, factor_ptr);
+term ::= term DIV factor {:
+	System.out.println("/");
+	term_ptr = ArbolGenerator.crearNodo("/", term_ptr, factor_ptr);
 	:};
 term ::= factor {: 
 	System.out.println("Term = factor");
@@ -182,21 +190,38 @@ factor ::= FLOAT_CONSTANT:constant {:
 	System.out.println("Float constant: " + constant );
 	factor_ptr = ArbolGenerator.crearHoja(constant.toString());
 	:};
-factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: 
-	System.out.println("Factor = (Expression)"); :};
+factor ::= OPEN_BRACKET {:
+    pila.push(term_ptr);
+    pila.push(expression_ptr);
+    :} expression CLOSE_BRACKET {:
+	System.out.println("Factor = (Expression)");
+	factor_ptr = expression_ptr;
+    expression_ptr = pila.pop();
+    term_ptr = pila.pop();
+	:};
 
 //IF------------------------------
 sentence ::= conditional {: 
-	System.out.println("sentencia"); :};
+	System.out.println("sentencia");
+	sentence_ptr = conditional_ptr;
+	:};
 conditional ::= trueCase falseCase {: 
-	System.out.println("Conditional if else"); :};
+	System.out.println("Conditional if else");
+	conditional_ptr = ArbolGenerator.crearNodo("IF", argument_ptr, ArbolGenerator.crearNodo("Cuerpo", trueCase_ptr, falseCase_ptr));
+	:};
 conditional ::= trueCase {: 
-	System.out.println("Conditional if"); :};
+	System.out.println("Conditional if");
+	conditional_ptr = ArbolGenerator.crearNodo("IF", argument_ptr, trueCase_ptr);
+	:};
 trueCase ::= CONDITIONAL OPEN_BRACKET argument CLOSE_BRACKET
             OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
-	System.out.println("TrueCase"); :};
+	System.out.println("TrueCase");
+    trueCase_ptr = block_ptr;
+	:};
 falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
-	System.out.println("FalseCase"); :};
+	System.out.println("FalseCase");
+	falseCase_ptr = block_ptr;
+	:};
 
 //WHILE---------------------------
 sentence ::= while {: 
@@ -281,18 +306,44 @@ argument ::= argument AND subArgument {:
 argument ::= argument OR subArgument {: 
 	System.out.println("Argument with or"); :} ;
 argument ::= subArgument {: 
-	System.out.println("Argument"); :} ;
+	System.out.println("Argument");
+	argument_ptr = subArgument_ptr;
+	:} ;
 subArgument ::= NOT subArgument {: 
 	System.out.println("Argument with NOT"); :} ;
-subArgument ::= factor GREATER factor {: 
-	System.out.println("Sub argument with greater"); :} ;
-subArgument ::= factor GREATER_OR_EQUAL factor {: 
-	System.out.println("Sub argument with greater or equal"); :} ;
-subArgument ::= factor LESS factor {: 
-	System.out.println("Sub argument with less"); :} ;
-subArgument ::= factor LESS_OR_EQUAL factor {: 
-	System.out.println("Sub argument with less or equal"); :} ;
-subArgument ::= factor EQUAL factor {: 
-	System.out.println("Sub argument with equal"); :} ;
-subArgument ::= factor DISTINCT factor {: 
-	System.out.println("Sub argument with distinct"); :} ;
+subArgument ::= factor {:
+    pila.push(factor_ptr);
+    :} GREATER:x factor {:
+	System.out.println("Sub argument with greater");
+    subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	:} ;
+subArgument ::= factor {:
+    pila.push(factor_ptr);
+    :} GREATER_OR_EQUAL:x factor {:
+	System.out.println("Sub argument with greater or equal");
+	subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	:} ;
+subArgument ::= factor {:
+    pila.push(factor_ptr);
+    :} LESS:x factor {:
+	System.out.println("Sub argument with less");
+	subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	:} ;
+subArgument ::= factor {:
+    pila.push(factor_ptr);
+    :} LESS_OR_EQUAL:x factor {:
+	System.out.println("Sub argument with less or equal");
+	subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	:} ;
+subArgument ::= factor {:
+    pila.push(factor_ptr);
+    :} EQUAL:x factor {:
+	System.out.println("Sub argument with equal");
+	subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	:} ;
+subArgument ::= factor {:
+    pila.push(factor_ptr);
+    :} DISTINCT:x factor {:
+	System.out.println("Sub argument with distinct");
+    subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	:} ;

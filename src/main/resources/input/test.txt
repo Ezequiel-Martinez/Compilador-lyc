@@ -1,1 +1,13 @@
-c = d * e
+if (4 < c)
+{
+    if (5 < h)
+    {
+        a = b
+    }
+}
+else {
+    if (666 < diablo)
+    {
+        a = b
+    }
+}

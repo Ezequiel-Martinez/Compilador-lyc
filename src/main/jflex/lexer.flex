@@ -194,25 +194,25 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
 
 
   /* operators */
-  {Plus}                                    { return symbol(ParserSym.PLUS); }
-  {Sub}                                     { return symbol(ParserSym.SUB); }
-  {Mult}                                    { return symbol(ParserSym.MULT); }
-  {Div}                                     { return symbol(ParserSym.DIV); }
-  {Assig}                                   { return symbol(ParserSym.ASSIG); }
-  {Greater}                                 { return symbol(ParserSym.GREATER); }
-  {Less}                                    { return symbol(ParserSym.LESS); }
-  {GreaterOrEqual}                          { return symbol(ParserSym.GREATER_OR_EQUAL); }
-  {LessOrEqual}                             { return symbol(ParserSym.LESS_OR_EQUAL); }
-  {Distinct}                                { return symbol(ParserSym.DISTINCT); }
-  {Equal}                                   { return symbol(ParserSym.EQUAL); }
-  {And}                                     { return symbol(ParserSym.AND); }
-  {Or}                                      { return symbol(ParserSym.OR); }
-  {OpenBracket}                             { return symbol(ParserSym.OPEN_BRACKET); }
-  {CloseBracket}                            { return symbol(ParserSym.CLOSE_BRACKET); }
-  {OpenCurlyBrace}                          { return symbol(ParserSym.OPEN_CURLY_BRACE); }
-  {CloseCurlyBrace}                         { return symbol(ParserSym.CLOSE_CURLY_BRACE); }
-  {DoubleDot}                               { return symbol(ParserSym.DOUBLE_DOT); }
-  {Comma}                                   { return symbol(ParserSym.COMMA); }
+  {Plus}                                    { return symbol(ParserSym.PLUS, yytext()); }
+  {Sub}                                     { return symbol(ParserSym.SUB, yytext()); }
+  {Mult}                                    { return symbol(ParserSym.MULT, yytext()); }
+  {Div}                                     { return symbol(ParserSym.DIV, yytext()); }
+  {Assig}                                   { return symbol(ParserSym.ASSIG, yytext()); }
+  {Greater}                                 { return symbol(ParserSym.GREATER, yytext()); }
+  {Less}                                    { return symbol(ParserSym.LESS, yytext()); }
+  {GreaterOrEqual}                          { return symbol(ParserSym.GREATER_OR_EQUAL, yytext()); }
+  {LessOrEqual}                             { return symbol(ParserSym.LESS_OR_EQUAL, yytext()); }
+  {Distinct}                                { return symbol(ParserSym.DISTINCT, yytext()); }
+  {Equal}                                   { return symbol(ParserSym.EQUAL, yytext()); }
+  {And}                                     { return symbol(ParserSym.AND, yytext()); }
+  {Or}                                      { return symbol(ParserSym.OR, yytext()); }
+  {OpenBracket}                             { return symbol(ParserSym.OPEN_BRACKET, yytext()); }
+  {CloseBracket}                            { return symbol(ParserSym.CLOSE_BRACKET, yytext()); }
+  {OpenCurlyBrace}                          { return symbol(ParserSym.OPEN_CURLY_BRACE, yytext()); }
+  {CloseCurlyBrace}                         { return symbol(ParserSym.CLOSE_CURLY_BRACE, yytext()); }
+  {DoubleDot}                               { return symbol(ParserSym.DOUBLE_DOT, yytext()); }
+  {Comma}                                   { return symbol(ParserSym.COMMA, yytext()); }
 
   {StringConstant}
       {
@@ -230,7 +230,7 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
             SymbolTableManager.insertInTable(entry);
           }
 
-          return symbol(ParserSym.STRING_CONSTANT);
+          return symbol(ParserSym.STRING_CONSTANT, yytext());
 
 
       }
