@@ -14,6 +14,7 @@ class Parser;
 action code {:
     HashMap<String, SymbolEntry> symbolTable = SymbolTableManager.symbolTable;
     List<String> idList = new ArrayList<>();
+    List<String> idListTotal = new ArrayList<>();
     DataType dataType;
     Stack<Node> pila = new Stack<Node>();
 
@@ -21,15 +22,41 @@ action code {:
     Node term_ptr = new Node();
     Node expression_ptr = new Node();
     Node assignment_ptr = new Node();
+
     Node sentence_ptr = new Node();
     Node block_ptr = new Node();
     Node ss_ptr = new Node();
+
     Node subArgument_ptr = new Node();
     Node argument_ptr = new Node();
     Node conditional_ptr = new Node();
     Node trueCase_ptr = new Node();
     Node falseCase_ptr = new Node();
-//    Node factor_ptr = new Node();
+    Node while_ptr = new Node();
+
+    Node doCase_ptr = new Node();
+    Node cases_ptr = new Node();
+    Node case_ptr = new Node();
+    Node ID_ptr = new Node();
+
+    Node ITE_ptr = new Node();
+    Node repeat_ptr = new Node();
+
+    Node init_ptr = new Node();
+    Node declarationBlock_ptr = new Node();
+    Node declaration_ptr = new Node();
+    Node variableList_ptr = new Node();
+    Node data_type_ptr = new Node();
+
+    Node content_ptr = new Node();
+    Node read_ptr = new Node();
+    Node write_ptr = new Node();
+
+//    Node variableList_ptr = new Node();
+//    Node variableList_ptr = new Node();
+//    Node variableList_ptr = new Node();
+//    Node variableList_ptr = new Node();
+//    Node variableList_ptr = new Node();
 
 
 :}
@@ -106,244 +133,351 @@ non terminal data_type;
 // Start Symbol Definition
 start with ss;
 
-ss ::= block | {: 
-	System.out.println("START SYMBOL");
-	ss_ptr = block_ptr;
-	:};
+ss ::= init_ block {:
+        ss_ptr = ArbolGenerator.crearNodo("SS",init_ptr,block_ptr);
+        //ss_ptr = block_ptr;
+    :}| {:
+	    System.out.println("START SYMBOL");
+	:}| init_;
+
 block ::= block sentence {:
-    block_ptr = ArbolGenerator.crearNodo("Bloque", block_ptr, sentence_ptr);
+        block_ptr = ArbolGenerator.crearNodo("Bloque", block_ptr, sentence_ptr);
     :};
-block ::= sentence {: 
-	System.out.println("Bloque");
-    block_ptr = sentence_ptr;
+block ::= sentence {:
+	    System.out.println("Bloque");
+        block_ptr = sentence_ptr;
 	:};
 
 
 //READ-------------------------
-sentence ::= read {: 
-	System.out.println("sentence"); :};
-read ::= READ OPEN_BRACKET content CLOSE_BRACKET {: 
-	System.out.println("Read"); :};
+sentence ::= read {:
+	    System.out.println("sentence");
+	    sentence_ptr = read_ptr;
+	:};
+read ::= READ OPEN_BRACKET content CLOSE_BRACKET {:
+	    System.out.println("Read");
+	    read_ptr = ArbolGenerator.crearNodo("READ", content_ptr);
+	:};
 
 //WRITE------------------------
-sentence ::= write {: 
-	System.out.println("sentence"); :};
-write ::= WRITE OPEN_BRACKET content CLOSE_BRACKET {: 
-	System.out.println("Write"); :};
+sentence ::= write {:
+	    System.out.println("sentence");
+	    sentence_ptr = write_ptr;
+	:};
+write ::= WRITE OPEN_BRACKET content CLOSE_BRACKET {:
+	    System.out.println("Write");
+	    write_ptr = ArbolGenerator.crearNodo("WRITE", content_ptr);
+    :};
 
 //CONTENT---------------------
-content ::= IDENTIFIER {: 
-	System.out.println("ID"); :};
-content ::= STRING_CONSTANT {: 
-	System.out.println("String"); :};
-content ::= FLOAT_CONSTANT {: 
-	System.out.println("Float"); :};
-content ::= INTEGER_CONSTANT {: 
-	System.out.println("Integer"); :};
+content ::= IDENTIFIER:id {:
+	    System.out.println("ID");
+	    if (!idListTotal.contains(id))
+	        throw new Exception("La variable \"" + id + "\" no se encuentra declarada en el bloque init");
+	    content_ptr = ArbolGenerator.crearHoja(id.toString());
+	:};
+content ::= STRING_CONSTANT:x {:
+	    System.out.println("String");
+	    content_ptr = ArbolGenerator.crearHoja(x.toString());
+	:};
+content ::= FLOAT_CONSTANT:x {:
+	    System.out.println("Float");
+	    content_ptr = ArbolGenerator.crearHoja(x.toString());
+	:};
+content ::= INTEGER_CONSTANT:x {:
+	    System.out.println("Integer");
+	    content_ptr = ArbolGenerator.crearHoja(x.toString());
+	:};
 
 //ASIGNACION------------------------
-sentence ::= assignment {: 
-	System.out.println("sentencia");
-    sentence_ptr = assignment_ptr;
+sentence ::= assignment {:
+	    System.out.println("sentencia");
+        sentence_ptr = assignment_ptr;
 	:};
-assignment ::= IDENTIFIER:id ASSIG expression {:
-	System.out.println("Assignment");
-	assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString()), expression_ptr);
+assignment ::= IDENTIFIER:id ASSIG {:
+	    if (!idListTotal.contains(id))
+	        throw new Exception("La variable \"" + id + "\" no se encuentra declarada en el bloque init");
+    :} expression:e {:
+	    System.out.println("Assignment");
+	    System.out.println("------------------------------   " + e);
+	    assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString()), expression_ptr);
 	:};
 assignment ::= IDENTIFIER:id ASSIG STRING_CONSTANT:str {:
-	System.out.println("Assignment with String");
-    assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString()), ArbolGenerator.crearHoja(str.toString()));
+	    System.out.println("Assignment with String");
+        if (!idListTotal.contains(id))
+            throw new Exception("La variable \"" + id + "\" no se encuentra declarada en el bloque init");
+        assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString()), ArbolGenerator.crearHoja(str.toString()));
 	:};
 expression ::= expression PLUS term {:
-	System.out.println("+");
-	expression_ptr = ArbolGenerator.crearNodo("+", expression_ptr, term_ptr);
+	    System.out.println("+");
+	    expression_ptr = ArbolGenerator.crearNodo("+", expression_ptr, term_ptr);
 	:};
 expression ::= expression SUB term {:
-	System.out.println("-");
-    expression_ptr = ArbolGenerator.crearNodo("-", expression_ptr, term_ptr);
+	    System.out.println("-");
+        expression_ptr = ArbolGenerator.crearNodo("-", expression_ptr, term_ptr);
 	:};
-expression ::= term {: 
-	System.out.println("Expression = Term");
-    expression_ptr = term_ptr;
+expression ::= term {:
+	    System.out.println("Expression = Term");
+        expression_ptr = term_ptr;
 	:};
 term ::= term MULT factor {:
-	System.out.println("*");
-    term_ptr = ArbolGenerator.crearNodo("*", term_ptr, factor_ptr);
+	    System.out.println("*");
+        term_ptr = ArbolGenerator.crearNodo("*", term_ptr, factor_ptr);
 	:};
 term ::= term DIV factor {:
-	System.out.println("/");
-	term_ptr = ArbolGenerator.crearNodo("/", term_ptr, factor_ptr);
+	    System.out.println("/");
+	    term_ptr = ArbolGenerator.crearNodo("/", term_ptr, factor_ptr);
 	:};
-term ::= factor {: 
-	System.out.println("Term = factor");
-	term_ptr = factor_ptr;
+term ::= factor {:
+	    System.out.println("Term = factor");
+	    term_ptr = factor_ptr;
 	:};
-factor ::= IDENTIFIER:id  {: 
-	System.out.println("Id: " + id);
-	factor_ptr = ArbolGenerator.crearHoja(id.toString());
+factor ::= IDENTIFIER:id  {:
+	    System.out.println("Id: " + id);
+	    if (!idListTotal.contains(id))
+	        throw new Exception("La variable \"" + id + "\" no se encuentra declarada en el bloque init");
+	    factor_ptr = ArbolGenerator.crearHoja(id.toString());
 	:};
-factor ::= INTEGER_CONSTANT:constant {: 
-	System.out.println("Integer constant: " + constant );
-	factor_ptr = ArbolGenerator.crearHoja(constant.toString());
+factor ::= INTEGER_CONSTANT:constant {:
+	    System.out.println("Integer constant: " + constant );
+	    factor_ptr = ArbolGenerator.crearHoja(constant.toString());
 	:};
-factor ::= FLOAT_CONSTANT:constant {: 
-	System.out.println("Float constant: " + constant );
-	factor_ptr = ArbolGenerator.crearHoja(constant.toString());
+factor ::= FLOAT_CONSTANT:constant {:
+	    System.out.println("Float constant: " + constant );
+	    factor_ptr = ArbolGenerator.crearHoja(constant.toString());
 	:};
 factor ::= OPEN_BRACKET {:
-    pila.push(term_ptr);
-    pila.push(expression_ptr);
+        pila.push(term_ptr);
+        pila.push(expression_ptr);
     :} expression CLOSE_BRACKET {:
-	System.out.println("Factor = (Expression)");
-	factor_ptr = expression_ptr;
-    expression_ptr = pila.pop();
-    term_ptr = pila.pop();
+	    System.out.println("Factor = (Expression)");
+	    factor_ptr = expression_ptr;
+        expression_ptr = pila.pop();
+        term_ptr = pila.pop();
 	:};
 
 //IF------------------------------
-sentence ::= conditional {: 
-	System.out.println("sentencia");
-	sentence_ptr = conditional_ptr;
+sentence ::= conditional {:
+	    System.out.println("sentencia");
+	    sentence_ptr = conditional_ptr;
+	    argument_ptr = pila.pop();
+	    trueCase_ptr = pila.pop();
+	    block_ptr = pila.pop();
 	:};
-conditional ::= trueCase falseCase {: 
-	System.out.println("Conditional if else");
-	conditional_ptr = ArbolGenerator.crearNodo("IF", argument_ptr, ArbolGenerator.crearNodo("Cuerpo", trueCase_ptr, falseCase_ptr));
+conditional ::= trueCase falseCase {:
+	    System.out.println("Conditional if else");
+	    conditional_ptr = ArbolGenerator.crearNodo("IF", argument_ptr, ArbolGenerator.crearNodo("Cuerpo", trueCase_ptr, falseCase_ptr));
 	:};
-conditional ::= trueCase {: 
-	System.out.println("Conditional if");
-	conditional_ptr = ArbolGenerator.crearNodo("IF", argument_ptr, trueCase_ptr);
+conditional ::= trueCase {:
+	    System.out.println("Conditional if");
+	    conditional_ptr = ArbolGenerator.crearNodo("IF", argument_ptr, trueCase_ptr);
 	:};
-trueCase ::= CONDITIONAL OPEN_BRACKET argument CLOSE_BRACKET
-            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
-	System.out.println("TrueCase");
-    trueCase_ptr = block_ptr;
+trueCase ::= CONDITIONAL {:
+        pila.push(block_ptr);
+        pila.push(trueCase_ptr);
+        pila.push(argument_ptr);
+    :} OPEN_BRACKET argument CLOSE_BRACKET
+    OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {:
+	    System.out.println("TrueCase");
+        trueCase_ptr = block_ptr;
 	:};
-falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
-	System.out.println("FalseCase");
-	falseCase_ptr = block_ptr;
+falseCase ::= ELSE OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {:
+	    System.out.println("FalseCase");
+	    falseCase_ptr = block_ptr;
 	:};
 
 //WHILE---------------------------
-sentence ::= while {: 
-	System.out.println("sentencia"); :};
-while ::= WHILE OPEN_BRACKET argument CLOSE_BRACKET
-            OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
-	System.out.println("while"); :};
+sentence ::= while {:
+	    System.out.println("sentencia");
+	    sentence_ptr = while_ptr;
+	    block_ptr = pila.pop();
+	    argument_ptr = pila.pop();
+	:};
+while ::= WHILE {:
+        pila.push(argument_ptr);
+        pila.push(block_ptr);
+    :} OPEN_BRACKET argument CLOSE_BRACKET
+       OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {:
+	    System.out.println("while");
+	    while_ptr = ArbolGenerator.crearNodo("WHILE", argument_ptr, block_ptr);
+    :};
 
 // INIT ------------------------------
-sentence ::= init_ {: 
-	System.out.println("sentencia"); :};
-init_ ::= INIT OPEN_CURLY_BRACE declarationBlock CLOSE_CURLY_BRACE {: 
-	System.out.println("init"); :};
-declarationBlock ::= declarationBlock declaration {: 
-	System.out.println("Declaration block"); :};
-declarationBlock ::= declaration {: 
-	System.out.println("Declaration block"); :};
-declaration ::= variableList DOUBLE_DOT data_type{:
-    System.out.println("Ejecutando el for");
+init_ ::= INIT OPEN_CURLY_BRACE declarationBlock CLOSE_CURLY_BRACE {:
+	    System.out.println("init");
+	    init_ptr = declarationBlock_ptr;
+	:};
+declarationBlock ::= declarationBlock declaration {:
+	    System.out.println("Declaration block");
+	    declarationBlock_ptr = ArbolGenerator.crearNodo("BLOQ_DEC", declarationBlock_ptr, declaration_ptr);
+	:};
+declarationBlock ::= declaration {:
+	    System.out.println("Declaration block");
+	    declarationBlock_ptr = declaration_ptr;
+	:};
+declaration ::= variableList DOUBLE_DOT data_type {:
+        System.out.println("Ejecutando el for");
 
-    for (String id : idList) {
-        System.out.println("Id de idList: " + id);
-        System.out.println("dataType: " + dataType);
-        SymbolTableManager.setDataTypeInTable(id, dataType);
-    }
-    System.out.println("Terminando el for");
-    idList.removeAll(idList);
-    System.out.println("Terminando el remove");
-:};
+        for (String id : idList) {
+            System.out.println("Id de idList: " + id);
+            System.out.println("dataType: " + dataType);
+            SymbolTableManager.setDataTypeInTable(id, dataType);
+        }
+
+        System.out.println("Terminando el for");
+        idList.removeAll(idList);
+        System.out.println("Terminando el remove");
+
+        declaration_ptr = ArbolGenerator.crearNodo("DEC", variableList_ptr, data_type_ptr);
+    :};
 data_type ::=
-              INT {:
-                System.out.println("Int data type");
-                dataType = DataType.INTEGER_TYPE;
-            :}
-            | FLOAT {:
-                System.out.println("Float data type");
-                dataType = DataType.FLOAT_TYPE;
-            :}
-            | STRING_DATA_TYPE {:
-                System.out.println("String data type");
-                dataType = DataType.STRING_TYPE;
-            :};
+    INT:x {:
+        System.out.println("Int data type");
+        dataType = DataType.INTEGER_TYPE;
+        data_type_ptr = ArbolGenerator.crearHoja(x.toString());
+    :}
+    | FLOAT:x {:
+        System.out.println("Float data type");
+        dataType = DataType.FLOAT_TYPE;
+        data_type_ptr = ArbolGenerator.crearHoja(x.toString());
+    :}
+    | STRING_DATA_TYPE:x {:
+        System.out.println("String data type");
+        dataType = DataType.STRING_TYPE;
+        data_type_ptr = ArbolGenerator.crearHoja(x.toString());
+    :};
 variableList ::= variableList COMMA IDENTIFIER:id {:
-    System.out.println("ID declared: " + id);
-    idList.add(id.toString());
-:} ;
+        System.out.println("ID declared: " + id);
+
+        if (idListTotal.contains(id))
+            throw new Exception("Variable \"" + id + "\" ya fue declarada anteriormente");
+
+        idList.add(id.toString());
+        idListTotal.add(id.toString());
+
+        variableList_ptr = ArbolGenerator.crearNodo("LISTA", variableList_ptr, ArbolGenerator.crearHoja(id.toString()));
+    :} ;
 variableList ::= IDENTIFIER:id {:
-    System.out.println("ID declared: " + id);
-    idList.add(id.toString());
- :};
+        System.out.println("ID declared: " + id);
+
+        if (idListTotal.contains(id))
+            throw new Exception("Variable \"" + id + "\" ya fue declarada anteriormente");
+
+        idList.add(id.toString());
+        idListTotal.add(id.toString());
+        variableList_ptr = ArbolGenerator.crearHoja(id.toString());
+    :};
 
 
 // DO CASE ---------------------------
-sentence ::= doCase {: 
-	System.out.println("sentence"); :};
-doCase ::= do default ENDDO {: 
-	System.out.println("DO CASE DEFAULT"); :};
-doCase ::= do ENDDO {: 
-	System.out.println("DO CASE"); :};
-do ::= DO IDENTIFIER cases {: 
-	System.out.println("DO"); :};
-cases ::= cases case {: 
-	System.out.println("cases"); :};
-cases ::= case;
+sentence ::= doCase {:
+	    System.out.println("sentence");
+	    sentence_ptr = doCase_ptr;
+	    cases_ptr = pila.pop();
+	    ID_ptr = pila.pop();
+	    argument_ptr = pila.pop();
+	    block_ptr = pila.pop();
+	:};
+doCase ::= do default ENDDO {:
+	    System.out.println("DO CASE DEFAULT");
+        cases_ptr = ArbolGenerator.crearNodo("CUERPO", cases_ptr, block_ptr);
+	    doCase_ptr = ArbolGenerator.crearNodo("DOCASE", ID_ptr, cases_ptr);
+	:};
+doCase ::= do ENDDO {:
+	    System.out.println("DO CASE");
+	    doCase_ptr = ArbolGenerator.crearNodo("DOCASE", ID_ptr, cases_ptr);
+	:};
+do ::= DO {:
+        pila.push(block_ptr);
+        pila.push(argument_ptr);
+        pila.push(ID_ptr);
+        pila.push(cases_ptr);
+    :}IDENTIFIER:id {:
+	    if (!idListTotal.contains(id))
+	        throw new Exception("La variable \"" + id + "\" no se encuentra declarada en el bloque init");
+    :} cases {:
+	    System.out.println("DO");
+	    ID_ptr = ArbolGenerator.crearHoja(id.toString());
+	:};
+cases ::= cases case {:
+	    System.out.println("cases");
+	    cases_ptr = ArbolGenerator.crearNodo("CASES", cases_ptr, case_ptr);
+	:};
+cases ::= case {:
+        cases_ptr = case_ptr;
+    :};
 case ::= CASE OPEN_BRACKET argument CLOSE_BRACKET
-         OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
-	System.out.println("case"); :};
-default ::= DEFAULT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
-	System.out.println("DEFAULT"); :};
+         OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {:
+	    System.out.println("case");
+	    case_ptr = ArbolGenerator.crearNodo("CASE", argument_ptr, block_ptr);
+    :};
+default ::= DEFAULT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {:
+	    System.out.println("DEFAULT");
+	:};
 
 
 // REPEAT INLINE -----------------------
-sentence ::= repeat {: 
-	System.out.println("sentence"); :};
-repeat ::= REPEAT INTEGER_CONSTANT OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {: 
-	System.out.println("repeat"); :};
-
+sentence ::= repeat {:
+	    System.out.println("sentence");
+	    sentence_ptr = repeat_ptr;
+	:};
+repeat ::= REPEAT {:
+    :} INTEGER_CONSTANT:x OPEN_CURLY_BRACE block CLOSE_CURLY_BRACE {:
+	    System.out.println("repeat");
+	    ITE_ptr = ArbolGenerator.crearNodo("<", ArbolGenerator.crearHoja("@aux"), ArbolGenerator.crearHoja(x.toString()));
+	    repeat_ptr = ArbolGenerator.crearNodo("REPEAT", ITE_ptr, block_ptr);
+	:};
 
 //ARGUMENTOS---------------------------
-argument ::= argument AND subArgument {: 
-	System.out.println("Argument with and"); :} ;
-argument ::= argument OR subArgument {: 
-	System.out.println("Argument with or"); :} ;
-argument ::= subArgument {: 
-	System.out.println("Argument");
-	argument_ptr = subArgument_ptr;
+argument ::= argument AND:x subArgument {:
+	    System.out.println("Argument with and");
+	    argument_ptr = ArbolGenerator.crearNodo(x.toString(),argument_ptr,subArgument_ptr);
 	:} ;
-subArgument ::= NOT subArgument {: 
-	System.out.println("Argument with NOT"); :} ;
+argument ::= argument OR:x subArgument {:
+	    System.out.println("Argument with or");
+	    argument_ptr = ArbolGenerator.crearNodo(x.toString(),argument_ptr,subArgument_ptr);
+	:} ;
+argument ::= subArgument {:
+	    System.out.println("Argument");
+	    argument_ptr = subArgument_ptr;
+	:} ;
+subArgument ::= NOT:x subArgument {:
+	    System.out.println("Argument with NOT");
+	    subArgument_ptr = ArbolGenerator.crearNodo("NEG", ArbolGenerator.crearHoja(x.toString()), subArgument_ptr);
+	:} ;
 subArgument ::= factor {:
-    pila.push(factor_ptr);
+        pila.push(factor_ptr);
     :} GREATER:x factor {:
-	System.out.println("Sub argument with greater");
-    subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	    System.out.println("Sub argument with greater");
+        subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
 	:} ;
 subArgument ::= factor {:
-    pila.push(factor_ptr);
+        pila.push(factor_ptr);
     :} GREATER_OR_EQUAL:x factor {:
-	System.out.println("Sub argument with greater or equal");
-	subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	    System.out.println("Sub argument with greater or equal");
+	    subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
 	:} ;
 subArgument ::= factor {:
-    pila.push(factor_ptr);
+        pila.push(factor_ptr);
     :} LESS:x factor {:
-	System.out.println("Sub argument with less");
-	subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	    System.out.println("Sub argument with less");
+	    subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
 	:} ;
 subArgument ::= factor {:
-    pila.push(factor_ptr);
+        pila.push(factor_ptr);
     :} LESS_OR_EQUAL:x factor {:
-	System.out.println("Sub argument with less or equal");
-	subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	    System.out.println("Sub argument with less or equal");
+	    subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
 	:} ;
 subArgument ::= factor {:
-    pila.push(factor_ptr);
+        pila.push(factor_ptr);
     :} EQUAL:x factor {:
-	System.out.println("Sub argument with equal");
-	subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	    System.out.println("Sub argument with equal");
+	    subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
 	:} ;
 subArgument ::= factor {:
-    pila.push(factor_ptr);
+        pila.push(factor_ptr);
     :} DISTINCT:x factor {:
-	System.out.println("Sub argument with distinct");
-    subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
+	    System.out.println("Sub argument with distinct");
+        subArgument_ptr = ArbolGenerator.crearNodo(x.toString(), pila.pop(), factor_ptr);
 	:} ;

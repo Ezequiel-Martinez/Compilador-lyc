@@ -102,11 +102,11 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
   {Else}                                    { return symbol(ParserSym.ELSE); }
   {Write}                                   { return symbol(ParserSym.WRITE); }
   {Read}                                    { return symbol(ParserSym.READ); }
-  {Not}                                     { return symbol(ParserSym.NOT); }
+  {Not}                                     { return symbol(ParserSym.NOT, yytext()); }
   {Init}                                    { return symbol(ParserSym.INIT); }
-  {Float}                                   { return symbol(ParserSym.FLOAT); }
-  {StringDataType}                          { return symbol(ParserSym.STRING_DATA_TYPE); }
-  {Int}                                     { return symbol(ParserSym.INT); }
+  {Float}                                   { return symbol(ParserSym.FLOAT, yytext()); }
+  {StringDataType}                          { return symbol(ParserSym.STRING_DATA_TYPE, yytext()); }
+  {Int}                                     { return symbol(ParserSym.INT, yytext()); }
   {Do}                                      { return symbol(ParserSym.DO); }
   {Case}                                    { return symbol(ParserSym.CASE); }
   {Default}                                 { return symbol(ParserSym.DEFAULT); }

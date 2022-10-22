@@ -12,15 +12,16 @@ public class ArbolGenerator {
         return root;
     }
 
+    public static Node crearNodo(String value, Node left) {
+        root = new Node(value, left);
+        return root;
+    }
+
     public static Node crearNodo(String value, Node left, Node right) {
         root = new Node(value, left, right);
         return root;
-
-
-
-
-
     }
+
 
 
     public static void printTree(String prefix, Node node, boolean isLeft)
