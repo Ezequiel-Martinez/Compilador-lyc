@@ -362,7 +362,7 @@ variableList ::= IDENTIFIER:id {:
 
         if (idListTotal.contains(id))
             throw new Exception("Variable \"" + id + "\" ya fue declarada anteriormente");
-//
+
         idList.add(id.toString());
         idListTotal.add(id.toString());
         variableList_ptr = ArbolGenerator.crearHoja(id.toString());
