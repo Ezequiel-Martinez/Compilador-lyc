@@ -1,7 +1,7 @@
 init {
-    a1, b1 : Float
-    variable1 : Int
-    p1, p2, p3 : String
+    a1, b1, h : Float
+    var1, base, c, d, e, a, b, variable1 : Int
+    pepe, p1, p2, p3 : String
 }
 
 c = d * (e - 21) / 4
@@ -16,12 +16,12 @@ if (a > b & c > b)
 }
 
 
-a = 999.99
-a = 99.
-a = .9999
+h = 999.99
+h = 99.
+h = .9999
 
-b = "@sdADaSjfla%dfg"
-b = "asldk  fh sjf"
+pepe = "@sdADaSjfla%dfg"
+pepe = "asldk  fh sjf"
 
 
 
@@ -32,13 +32,13 @@ DO a
 CASE (a == 101)
 {
     write("a > b & c > b")
-    a = .9999
+    h = .9999
 }
 CASE (a > 202)
 {
     write("a > b & c > b")
     a = 1234
-    a = "jhtfchjyxdtyg"
+    pepe = "jhtfchjyxdtyg"
 }
 DEFAULT
 {
