@@ -2,6 +2,8 @@ package lyc.compiler.arbol;
 
 import lyc.compiler.table.DataType;
 
+import java.util.Objects;
+
 public class Node {
     String value;
     String data_type;
@@ -34,31 +36,50 @@ public class Node {
         this.right = right;
         this.left = left;
 
-        if (this.left.data_type == null || this.right.data_type == null)
+        if (this.left == null || this.right == null)
+            this.data_type = null;
+        else if (this.left.data_type == null || this.right.data_type == null)
             this.data_type = null;
         else if (this.left.data_type.equals(this.right.data_type))
             this.data_type = this.left.data_type;
         else if (this.left.data_type.equals(DataType.INTEGER_TYPE.toString()))
         {
-            switch (this.right.data_type) {
-                case "Long" -> this.data_type = "Long";
-                case "FLOAT_TYPE", "Double" -> this.data_type = "Double";
-                default -> throw new Exception("Conversión de tipos inválida, no se puede convertir Int a " + this.right.data_type);
+            if(Objects.equals(this.value, "="))
+                throw new Exception("Conversión de tipos inválida, no se puede asignar un " + this.right.data_type + " a un Int");
+            else {
+                switch (this.right.data_type) {
+                    case "Long" -> this.data_type = "Long";
+                    case "FLOAT_TYPE", "Double" -> this.data_type = "Double";
+                    default -> throw new Exception("Conversión de tipos inválida, no se puede convertir Int a " + this.right.data_type);
+                }
             }
         }
         else if (this.left.data_type.equals("Long"))
         {
-            switch (this.right.data_type) {
-                case "INTEGER_TYPE" -> this.data_type = "Long";
-                case "FLOAT_TYPE", "Double" -> this.data_type = "Double";
-                default -> throw new Exception("Conversión de tipos inválida, no se puede convertir Long a " + this.right.data_type);
+            if(Objects.equals(this.value, "=")) {
+                if ("INTEGER_TYPE".equals(this.right.data_type)) {
+                    this.data_type = "Long";
+                } else {
+                    throw new Exception("Conversión de tipos inválida, no se puede asignar un " + this.right.data_type + " a un Long");
+                }
+            }
+            else {
+                switch (this.right.data_type) {
+                    case "INTEGER_TYPE" -> this.data_type = "Long";
+                    case "FLOAT_TYPE", "Double" -> this.data_type = "Double";
+                    default -> throw new Exception("Conversión de tipos inválida, no se puede convertir Long a " + this.right.data_type);
+                }
             }
         }
         else if (this.left.data_type.equals(DataType.FLOAT_TYPE.toString()))
         {
-            switch (this.right.data_type) {
-                case "INTEGER_TYPE", "Long", "Double" -> this.data_type = "Double";
-                default -> throw new Exception("Conversión de tipos inválida, no se puede convertir Float a " + this.right.data_type);
+            if(Objects.equals(this.value, "="))
+                throw new Exception("Conversión de tipos inválida, no se puede asignar un " + this.right.data_type + " a un Float");
+            else {
+                switch (this.right.data_type) {
+                    case "INTEGER_TYPE", "Long", "Double" -> this.data_type = "Double";
+                    default -> throw new Exception("Conversión de tipos inválida, no se puede convertir Float a " + this.right.data_type);
+                }
             }
         }
         else if (this.left.data_type.equals("Double"))

@@ -178,15 +178,15 @@ content ::= IDENTIFIER:id {:
 	:};
 content ::= STRING_CONSTANT:x {:
 	    System.out.println("String");
-	    content_ptr = ArbolGenerator.crearHoja(x.toString(), symbolTable.get(x.toString()).getDataType().toString());
+	    content_ptr = ArbolGenerator.crearHoja(x.toString(), DataType.STRING_TYPE.toString());
 	:};
 content ::= FLOAT_CONSTANT:x {:
 	    System.out.println("Float");
-	    content_ptr = ArbolGenerator.crearHoja(x.toString(), symbolTable.get(x.toString()).getDataType().toString());
+	    content_ptr = ArbolGenerator.crearHoja(x.toString(), DataType.FLOAT_TYPE.toString());
 	:};
 content ::= INTEGER_CONSTANT:x {:
 	    System.out.println("Integer");
-	    content_ptr = ArbolGenerator.crearHoja(x.toString(), symbolTable.get(x.toString()).getDataType().toString());
+	    content_ptr = ArbolGenerator.crearHoja(x.toString(), DataType.INTEGER_TYPE.toString());
 	:};
 
 //ASIGNACION------------------------
@@ -200,6 +200,7 @@ assignment ::= IDENTIFIER:id ASSIG {:
     :} expression:e {:
 	    System.out.println("Assignment");
 	    assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString(), symbolTable.get(id.toString()).getDataType().toString()), expression_ptr);
+	    System.out.println();
 	:};
 assignment ::= IDENTIFIER:id ASSIG STRING_CONSTANT:str {:
 	    System.out.println("Assignment with String");
