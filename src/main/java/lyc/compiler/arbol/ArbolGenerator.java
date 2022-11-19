@@ -1,5 +1,7 @@
 package lyc.compiler.arbol;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Stack;
 
 public class ArbolGenerator {
@@ -36,6 +38,20 @@ public class ArbolGenerator {
             printTree(prefix + (isLeft ? "|   " : "    "), node.left, true);
             printTree(prefix + (isLeft ? "|   " : "    "), node.right, false);
         }
+    }
+
+    public static void printPostorder(Node node, FileWriter fileWriter) throws IOException {
+        if (node == null)
+            return;
+
+        // first recur on left subtree
+        printPostorder(node.left, fileWriter);
+
+        // then recur on right subtree
+        printPostorder(node.right, fileWriter);
+
+        // now deal with the node
+        fileWriter.write(node.value + " ");
     }
 
 
