@@ -178,7 +178,7 @@ content ::= IDENTIFIER:id {:
 	:};
 content ::= STRING_CONSTANT:x {:
 	    System.out.println("String");
-	    content_ptr = ArbolGenerator.crearHoja(x.toString(), DataType.STRING_TYPE.toString());
+	    content_ptr = ArbolGenerator.crearHoja("_" + x.toString().substring(1, x.toString().length() - 1).replace(" ","_"), DataType.STRING_TYPE.toString());
 	:};
 content ::= FLOAT_CONSTANT:x {:
 	    System.out.println("Float");
@@ -206,7 +206,7 @@ assignment ::= IDENTIFIER:id ASSIG STRING_CONSTANT:str {:
 	    System.out.println("Assignment with String");
         if (!idListTotal.contains(id))
             throw new Exception("La variable \"" + id + "\" no se encuentra declarada en el bloque init");
-        assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString(), symbolTable.get(id.toString()).getDataType().toString()), ArbolGenerator.crearHoja(str.toString(), DataType.STRING_TYPE.toString()));
+        assignment_ptr = ArbolGenerator.crearNodo("=", ArbolGenerator.crearHoja(id.toString(), symbolTable.get(id.toString()).getDataType().toString()), ArbolGenerator.crearHoja("_" + str.toString().substring(1, str.toString().length() - 1).replace(" ","_"), DataType.STRING_TYPE.toString()));
 	:};
 expression ::= expression PLUS term {:
 	    System.out.println("+");
@@ -267,7 +267,7 @@ sentence ::= conditional {:
 	:};
 conditional ::= trueCase falseCase {:
 	    System.out.println("Conditional if else");
-	    conditional_ptr = ArbolGenerator.crearNodo("IF", argument_ptr, ArbolGenerator.crearNodo("Cuerpo", trueCase_ptr, falseCase_ptr, null), null);
+	    conditional_ptr = ArbolGenerator.crearNodo("IF", argument_ptr, ArbolGenerator.crearNodo("CUERPO", trueCase_ptr, falseCase_ptr, null), null);
 	:};
 conditional ::= trueCase {:
 	    System.out.println("Conditional if");

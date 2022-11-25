@@ -226,7 +226,7 @@ FloatConstant = ({Dot}{Digit}+) | ({Digit}+{Dot}) | ({Digit}+{Dot}{Digit}+)
 
           if(!SymbolTableManager.existsInTable(yytext()))
           {
-            SymbolEntry entry = new SymbolEntry("_" + stringBuffer.toString(), DataType.STRING_CONS, stringBuffer.toString(), Integer.toString(stringBuffer.length()));
+            SymbolEntry entry = new SymbolEntry("_" + stringBuffer.toString().replace(" ","_"), DataType.STRING_CONS, stringBuffer.toString(), Integer.toString(stringBuffer.length()));
             SymbolTableManager.insertInTable(entry);
           }
 

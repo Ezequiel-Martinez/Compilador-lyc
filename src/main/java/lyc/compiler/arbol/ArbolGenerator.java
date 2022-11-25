@@ -9,9 +9,14 @@ public class ArbolGenerator {
     public static String aux;
     public static boolean asig = false;
     public static boolean isIF = false;
+    public static boolean isDocase = false;
+    public static boolean isIncase = false;
     public static boolean andIzq = false;
     public static boolean caseOr = false;
     public static boolean neg = false;
+    public static int antDocase;
+    public static int endDocase;
+    public static int caso;
     public static int ant;
     public static int specialNumber = 0;
     public static int cont = 1;
@@ -59,7 +64,7 @@ public class ArbolGenerator {
         if(node.value.equals("SS"))
             printPostorder(node.right, fileWriter);
         else if(asig == true){
-            fileWriter.write("FSTP " + node.value + " \n");
+            fileWriter.write("\tFSTP " + node.value + " \n");
             asig = false;
         }
         else {
@@ -73,12 +78,12 @@ public class ArbolGenerator {
                     printPostorder(node.left, fileWriter);
                     printPostorder(node.right, fileWriter);
                     switch (node.value) {
-                        case "+" -> fileWriter.write("ADD" + " \n");
-                        case "-" -> fileWriter.write("SUB" + " \n");
-                        case "*" -> fileWriter.write("MUL" + " \n");
-                        case "/" -> fileWriter.write("DIV" + " \n");
+                        case "+" -> fileWriter.write("\tFADD" + " \n");
+                        case "-" -> fileWriter.write("\tFSUB" + " \n");
+                        case "*" -> fileWriter.write("\tFMUL" + " \n");
+                        case "/" -> fileWriter.write("\tFDIV" + " \n");
                     }
-                    fileWriter.write("FFREE 0" + " \n");
+                    fileWriter.write("\tFFREE 0" + " \n");
                     break;
                 case "NEG":
                     changeNeg();
@@ -104,28 +109,21 @@ public class ArbolGenerator {
                         else {
                             andIzq = true;
                             contarOrs(node);
-                            System.out.println(cont2 + " AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                             if(cont2 == 0)
                                 changeNeg();
                             cont2 = 0;
-                            //???????????????????????????
                             printPostorder(node.left, fileWriter);
                             changeNeg();
                             andIzq = false;
                             aux = etiqetas.pop();
                             contarOrs(node);
-                            System.out.println(cont2 + " AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                             if(cont2 >= 1){
                                 if(specialNumber == 0){
                                     specialNumber = cont - 2;
                                 }
                                 ant = cont;
                                 cont = specialNumber;
-                                System.out.println(ant + " " + specialNumber + " WWWWWWWWWWWWWW");
                                 printPostorder(node.right, fileWriter);
-                                //cont = ant;
-                                //cont--;
-                                //cont--;
                                 etiqetas.pop();
                             }
                             else {
@@ -139,14 +137,22 @@ public class ArbolGenerator {
                 case "||":
                     if(caseOr == false){
                         caseOr = true;
+                        if(isIncase == true){
+                            cont++;
+                        }
                         changeNeg();
                         printPostorder(node.left, fileWriter);
                         changeNeg();
                         aux = etiqetas.pop();
                         if(specialNumber != 0)
                             cont = ant;
+                        if(isIncase == true){
+                            isIncase = false;
+                            antDocase = cont;
+                            cont = caso;
+                        }
                         printPostorder(node.right, fileWriter);
-                        fileWriter.write(aux + " \n");
+                        fileWriter.write(aux + ":\n");
                         caseOr = false;
                     }
                     else{
@@ -154,7 +160,6 @@ public class ArbolGenerator {
                             andIzq = false;
                             printPostorder(node.left, fileWriter);
                             changeNeg();
-                            //andIzq = true; ??????????
                             if(specialNumber != 0)
                                 cont = ant;
                             printPostorder(node.right, fileWriter);
@@ -170,46 +175,46 @@ public class ArbolGenerator {
                 case "<", ">", "<=", ">=", "==", "!=":
                     printPostorder(node.left, fileWriter);
                     printPostorder(node.right, fileWriter);
-                    fileWriter.write("FXCH" + " \n" + "FCOM" + " \n" + "FSTSW AX" + " \n" + "SAHF" + " \n");
+                    fileWriter.write("\tFXCH" + " \n" + "\tFCOM" + " \n" + "\tFSTSW AX" + " \n" + "\tSAHF" + " \n");
                     switch (node.value) {
                         case "<":
                             if(neg == false)
-                                fileWriter.write("JAE Etiq" + cont + " \n");
+                                fileWriter.write("\tJAE ETIQ" + cont + " \n");
                             else
-                                fileWriter.write("JB Etiq" + cont + " \n");
+                                fileWriter.write("\tJB ETIQ" + cont + " \n");
                             break;
                         case ">":
                             if(neg == false)
-                                fileWriter.write("JBE Etiq" + cont + " \n");
+                                fileWriter.write("\tJBE ETIQ" + cont + " \n");
                             else
-                                fileWriter.write("JA Etiq" + cont + " \n");
+                                fileWriter.write("\tJA ETIQ" + cont + " \n");
                             break;
                         case "<=":
                             if(neg == false)
-                                fileWriter.write("JA Etiq" + cont + " \n");
+                                fileWriter.write("\tJA ETIQ" + cont + " \n");
                             else
-                                fileWriter.write("JBE Etiq" + cont + " \n");
+                                fileWriter.write("\tJBE ETIQ" + cont + " \n");
                             break;
                         case ">=":
                             if(neg == false)
-                                fileWriter.write("JB Etiq" + cont + " \n");
+                                fileWriter.write("\tJB ETIQ" + cont + " \n");
                             else
-                                fileWriter.write("JAE Etiq" + cont + " \n");
+                                fileWriter.write("\tJAE ETIQ" + cont + " \n");
                             break;
                         case "==":
                             if(neg == false)
-                                fileWriter.write("JNE Etiq" + cont + " \n");
+                                fileWriter.write("\tJNE ETIQ" + cont + " \n");
                             else
-                                fileWriter.write("JE Etiq" + cont + " \n");
+                                fileWriter.write("\tJE ETIQ" + cont + " \n");
                             break;
                         case "!=":
                             if(neg == false)
-                                fileWriter.write("JE Etiq" + cont + " \n");
+                                fileWriter.write("\tJE ETIQ" + cont + " \n");
                             else
-                                fileWriter.write("JNE Etiq" + cont + " \n");
+                                fileWriter.write("\tJNE ETIQ" + cont + " \n");
                             break;
                     }
-                    etiqetas.push("Etiq" + cont);
+                    etiqetas.push("ETIQ" + cont);
                     cont++;
                     break;
                 case "IF":
@@ -217,30 +222,36 @@ public class ArbolGenerator {
                     specialNumber = 0;
                     andIzq = false;
                     neg = false;
-                    if(node.right.value.equals("Cuerpo")) {
+                    if(node.right.value.equals("CUERPO")) {
                         isIF = true;
                         printPostorder(node.right, fileWriter);
                     }
                     else {
                         printPostorder(node.right, fileWriter);
-                        fileWriter.write(etiqetas.pop() + " \n");
+                        fileWriter.write(etiqetas.pop() + ":\n");
                     }
                     break;
-                case "Cuerpo":
+                case "CUERPO":
                     if(isIF == true){
                         isIF = false;
                         printPostorder(node.left, fileWriter);
-                        fileWriter.write("JMP Etiq" + cont + " \n");
-                        fileWriter.write(etiqetas.pop() + " \n");
-                        etiqetas.push("Etiq" + cont);
+                        fileWriter.write("\tJMP ETIQ" + cont + " \n");
+                        fileWriter.write(etiqetas.pop() + ":\n");
+                        etiqetas.push("ETIQ" + cont);
                         cont++;
                         printPostorder(node.right, fileWriter);
-                        fileWriter.write(etiqetas.pop() + " \n");
+                        fileWriter.write(etiqetas.pop() + ":\n");
+                    }
+                    if(isDocase == true){
+                        isDocase = false;
+                        printPostorder(node.left, fileWriter);
+                        fileWriter.write("ETIQ" + caso + ":\n");
+                        printPostorder(node.right, fileWriter);
                     }
                     break;
                 case "WHILE":
-                    fileWriter.write("Etiq" + cont + " \n");
-                    etiqetas.push("Etiq" + cont);
+                    fileWriter.write("ETIQ" + cont + ":\n");
+                    etiqetas.push("ETIQ" + cont);
                     cont++;
                     printPostorder(node.left, fileWriter);
                     specialNumber = 0;
@@ -248,22 +259,50 @@ public class ArbolGenerator {
                     neg = false;
                     printPostorder(node.right, fileWriter);
                     aux = etiqetas.pop();
-                    fileWriter.write("JMP " + etiqetas.pop() + " \n");
-                    fileWriter.write(aux + " \n");
+                    fileWriter.write("\tJMP " + etiqetas.pop() + " \n");
+                    fileWriter.write(aux + ":\n");
+                    break;
+                case "DOCASE":
+                    endDocase = cont;
+                    caso = cont;
+                    cont++;
+                    if(node.right.value.equals("CUERPO")) {
+                        isDocase = true;
+                        caso = cont;
+                        cont++;
+                    }
+                    antDocase = cont;
+                    printPostorder(node.right, fileWriter);
+                    cont = antDocase;
+                    fileWriter.write("ETIQ" + endDocase + ":\n");
+                    break;
+                case "CASE":
+                    cont = caso;
+                    isIncase = true;
+                    printPostorder(node.left, fileWriter);
+                    specialNumber = 0;
+                    andIzq = false;
+                    neg = false;
+                    cont = antDocase;
+                    etiqetas.pop();
+                    isIncase = false;
+                    printPostorder(node.right, fileWriter);
+                    antDocase = cont;
+                    fileWriter.write("\tJMP ETIQ" + endDocase + " \n");
+                    break;
+                case "REPEAT":
                     break;
                 case "WRITE", "READ":
-                    fileWriter.write("mov dx,OFFSET " + node.left.value + "\nmov ah,9 \nint 21h" + " \n");
+                    fileWriter.write("\tmov dx,OFFSET " + node.left.value + "\n\tmov ah,9 \n\tint 21h" + " \n");
                     break;
-                case "Bloque":
+                case "Bloque", "CASES":
                     printPostorder(node.left, fileWriter);
                     printPostorder(node.right, fileWriter);
-                    break;
-                case "REPEAT", "DOCASE":
                     break;
                 default:
                     printPostorder(node.left, fileWriter);
                     printPostorder(node.right, fileWriter);
-                    fileWriter.write("FLD " + node.value + " \n");
+                    fileWriter.write("\tFLD " + node.value + " \n");
             }
         }
     }
